@@ -1,15 +1,19 @@
 from django import forms
-from .models import User
+from .models import Profile
 
-class UserForm(forms.ModelForm):
+class RegistrationForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput
+    )
+    
     class Meta:
-        model = User
+        model = Profile
         fields = [
             'username',
             'email',
             'first_name',
             'last_name',
-            'role',
-            'phone'
+            'phone',
+            'password'
         ]
     

@@ -54,7 +54,7 @@ class Product(models.Model):
         decimal_places=2
     )
     
-    reoder_level = models.PositiveIntegerField(default=10)
+    reorder_level = models.PositiveIntegerField(default=10)
     
     description = models.TextField(blank=True)
     
@@ -65,10 +65,10 @@ class Product(models.Model):
     def __str__(self) -> str:
         return self.name
     
-# ============================================ STOCK TRANSTION =================================================
+# ============================================ STOCK TRANSITION =================================================
 class StockTransaction(models.Model):
     
-    TRANSATION_CHOICE = [
+    TRANSITION_CHOICE = [
         ('in', 'Stock In'),
         ('out', 'Stock Out')
     ]
@@ -76,10 +76,10 @@ class StockTransaction(models.Model):
     product = models.ForeignKey(
         Category,
         on_delete= models.CASCADE,
-        related_name='transation'
+        related_name='transition'
     )
     
-    transaction_type  = models.CharField(  max_length=10, choices=TRANSATION_CHOICE)
+    transaction_type  = models.CharField(  max_length=10, choices=TRANSITION_CHOICE)
     
     quantity = models.PositiveIntegerField()
     

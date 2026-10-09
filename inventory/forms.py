@@ -26,7 +26,7 @@ class SupplierForm(forms.ModelForm):
             'supplier',
             'quantity',
             'price',
-            'reoder_level',
+            'reorder_level',
             'description'
         ]
         
@@ -35,7 +35,7 @@ class StockTransactionForm(forms.ModelForm):
         model = StockTransaction
         fields = [
             'product', 
-            'transtion_type', 
+            'transition_type', 
             'quantity', 
             'user', 
             'note'
