@@ -1,0 +1,74 @@
+<!-- Top Navigation Bar -->
+<header class="top-navbar">
+    <!-- Left Section: Toggle & Search -->
+    <div class="navbar-left">
+        <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar" aria-label="Toggle Navigation">
+            <i class="bx bx-menu"></i>
+        </button>
+
+        <div class="navbar-search-box">
+            <i class="bx bx-search"></i>
+            <input type="text" id="globalSearchInput" placeholder="Search products, SKU, suppliers...">
+            <span class="kbd-shortcut">Ctrl+K</span>
+        </div>
+    </div>
+
+    <!-- Right Section: Quick Actions & Profile -->
+    <div class="navbar-right">
+        <!-- Stock Alert Notification Bell -->
+        <button type="button" class="nav-action-btn" title="Stock Notifications" aria-label="Notifications">
+            <i class="bx bx-bell"></i>
+            <span class="badge-dot"></span>
+        </button>
+
+        <!-- User Authentication & Dropdown Menu -->
+        {% if user.is_authenticated %}
+        <div class="user-menu-wrapper" id="userMenuWrapper">
+            <button type="button" class="user-menu-trigger" id="userMenuTrigger">
+                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <span style="font-weight: 600; font-size: 0.88rem;">{{ user.username }}</span>
+                <i class="bx bx-chevron-down" style="font-size: 1.1rem; color: var(--color-text-muted);"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <div class="dropdown-header">
+                    <div class="dropdown-header-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="dropdown-header-role">Role: {{ user.role|default:"User" }}</div>
+                </div>
+
+                <a href="{% url 'home' %}" class="dropdown-item">
+                    <i class="bx bx-home-alt"></i>
+                    <span>Dashboard Home</span>
+                </a>
+
+                {% if user.role == 'manager' %}
+                <a href="{% url 'manager_dashboard' %}" class="dropdown-item">
+                    <i class="bx bx-bar-chart-square"></i>
+                    <span>Manager Dashboard</span>
+                </a>
+                {% elif user.role == 'staff' %}
+                <a href="{% url 'staff_dashboard' %}" class="dropdown-item">
+                    <i class="bx bx-task"></i>
+                    <span>Staff Dashboard</span>
+                </a>
+                {% endif %}
+
+                <div style="height: 1px; background: var(--border-color); margin: 0.35rem 0;"></div>
+
+                <a href="{% url 'logout' %}" class="dropdown-item danger">
+                    <i class="bx bx-log-out"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Log In</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Register</a>
+        </div>
+        {% endif %}
+    </div>
+</header>

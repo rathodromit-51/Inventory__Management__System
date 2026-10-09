@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.shortcuts import render, redirect
 from .models import Profile
 from .forms import RegistrationForm
@@ -26,24 +27,43 @@ def RegisterView(request):
 
 # ==================================== Login View ====================================
 def LoginView(request):
-    if request.Method == "POST":
+    if request.method == "POST":
 
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user = Profile.objects.filter(username=username).first()
-
-        if user and user.check_password(password):
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        ) 
+        
+        if user is not None:
             login(request, user)
             return redirect('home')
         else:
             messages.error(request, 'Invalid credentials')
-    else:
-        form = RegistrationForm()
-    return render(request, 'accounts/login.html', {'form': form})  
+    return render(request, 'accounts/login.html')
 
 
 # ==================================== Logout View =======================================
 def LogoutView(request):
     logout(request)
     return redirect('login') 
+
+# ==================================== Dashboard Views ====================================
+def manager_dashboard(request):
+    return render(request, 'accounts/manager_dashboard.html')
+
+def staff_dashboard(request):
+    return render(request, 'accounts/staff_dashboard.html')
+
+# ==================================== Home ====================================
+def home(request):
+    user = request.user
+    if user.role == 'admin':
+        return redirect('main')
+    elif user.role == 'manager':
+        return redirect('manager_dashboard')
+    else:
+        return redirect('staff_dashboard')

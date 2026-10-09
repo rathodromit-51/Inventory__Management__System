@@ -1,0 +1,91 @@
+<!-- Sidebar Component -->
+<aside class="sidebar" id="appSidebar">
+    <!-- Brand / Logo -->
+    <div class="sidebar-header">
+        <a href="{% url 'home' %}" style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="brand-icon">
+                <i class="bx bx-cube-alt"></i>
+            </div>
+            <div class="brand-text">
+                <h1>InvenTrack</h1>
+                <span>Inventory Pro</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="sidebar-body">
+        <!-- Main Section -->
+        <div class="nav-group-title">Main</div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link {% block nav_dashboard %}{% endblock %}">
+                    <i class="bx bxs-dashboard"></i>
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Inventory Section -->
+        <div class="nav-group-title">Inventory</div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="#" class="nav-link {% block nav_products %}{% endblock %}">
+                    <i class="bx bx-package"></i>
+                    <span class="nav-link-text">Products</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link {% block nav_categories %}{% endblock %}">
+                    <i class="bx bx-category-alt"></i>
+                    <span class="nav-link-text">Categories</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link {% block nav_suppliers %}{% endblock %}">
+                    <i class="bx bx-store-alt"></i>
+                    <span class="nav-link-text">Suppliers</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Transactions Section -->
+        <div class="nav-group-title">Stock & Logs</div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="#" class="nav-link {% block nav_stock %}{% endblock %}">
+                    <i class="bx bx-transfer-alt"></i>
+                    <span class="nav-link-text">Stock Movements</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Role-based Admin / Manager Section -->
+        {% if user.is_authenticated and user.role == 'admin' or user.is_superuser %}
+        <div class="nav-group-title">System</div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="{% url 'admin:index' %}" class="nav-link {% block nav_admin %}{% endblock %}">
+                    <i class="bx bx-shield-quarter"></i>
+                    <span class="nav-link-text">Django Admin</span>
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- User Profile Snippet in Sidebar Footer -->
+    {% if user.is_authenticated %}
+    <div class="sidebar-footer">
+        <div class="user-snippet">
+            <div class="user-avatar">
+                {{ user.username|make_list|first|upper }}
+            </div>
+            <div class="user-meta">
+                <span class="user-name">{{ user.first_name|default:user.username }}</span>
+                <span class="user-role-badge">{{ user.role|default:"User" }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</aside>

@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="{% block meta_description %}InvenTrack - Modern Inventory Management System for products, stock movements, and suppliers.{% endblock %}">
+    <title>{% block title %}Inventory Management System{% endblock %}</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Boxicons Icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <!-- Application CSS -->
+    <link rel="stylesheet" href="{% static 'CSS/style.css' %}">
+
+    <!-- Extra Custom Styles per page -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Main App Container Shell -->
+    <div class="app-container" id="appContainer">
+
+        <!-- Mobile Drawer Backdrop Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar Navigation Block -->
+        {% block sidebar %}
+            {% include 'include/sidebar.html' %}
+        {% endblock %}
+
+        <!-- Content Area Wrapper -->
+        <div class="main-wrapper">
+
+            <!-- Top Header / Navbar Block -->
+            {% block navbar %}
+                {% include 'include/navbar.html' %}
+            {% endblock %}
+
+            <!-- Main Content Container -->
+            <main class="main-content">
+
+                <!-- Django Flash Messages (Alerts) -->
+                {% if messages %}
+                <div class="messages-container" id="messagesContainer">
+                    {% for message in messages %}
+                    <div class="alert {{ message.tags }}" role="alert">
+                        <div class="alert-content">
+                            {% if message.tags == 'success' %}
+                                <i class="bx bx-check-circle"></i>
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                <i class="bx bx-error-circle"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="bx bx-error"></i>
+                            {% else %}
+                                <i class="bx bx-info-circle"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="alert-close" onclick="this.closest('.alert').remove()" aria-label="Close notification">
+                            <i class="bx bx-x"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Optional Page Header (Title, Subtitle & Action buttons) -->
+                {% block page_header %}
+                <div class="page-header">
+                    <div class="page-header-title">
+                        <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+                        <p>{% block page_subtitle %}Overview and live inventory metrics{% endblock %}</p>
+                    </div>
+                    <div class="page-header-actions">
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                </div>
+                {% endblock %}
+
+                <!-- Main Dynamic Content Block -->
+                {% block content %}
+                {% endblock %}
+
+            </main>
+
+            <!-- Footer Block -->
+            {% block footer %}
+                {% include 'include/footer.html' %}
+            {% endblock %}
+
+        </div>
+    </div>
+
+    <!-- Layout Logic & Interactive Utilities -->
+    <script>
+        (function() {
+            const appContainer = document.getElementById('appContainer');
+            const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const userMenuTrigger = document.getElementById('userMenuTrigger');
+            const userDropdownMenu = document.getElementById('userDropdownMenu');
+            const globalSearchInput = document.getElementById('globalSearchInput');
+
+            // 1. Restore Sidebar State from localStorage (Desktop)
+            const savedSidebarState = localStorage.getItem('sidebar-collapsed');
+            if (savedSidebarState === 'true' && window.innerWidth > 992) {
+                appContainer.classList.add('sidebar-collapsed');
+            }
+
+            // 2. Toggle Sidebar (Desktop collapsed / Mobile off-canvas)
+            if (sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (window.innerWidth <= 992) {
+                        appContainer.classList.toggle('mobile-sidebar-open');
+                    } else {
+                        appContainer.classList.toggle('sidebar-collapsed');
+                        localStorage.setItem('sidebar-collapsed', appContainer.classList.contains('sidebar-collapsed'));
+                    }
+                });
+            }
+
+            // 3. Close Mobile Sidebar on Overlay Click
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    appContainer.classList.remove('mobile-sidebar-open');
+                });
+            }
+
+            // 4. User Dropdown Toggle
+            if (userMenuTrigger && userDropdownMenu) {
+                userMenuTrigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdownMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userMenuTrigger.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                        userDropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // 5. Global Keyboard Shortcut for Search (Ctrl+K or Cmd+K)
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+                    e.preventDefault();
+                    if (globalSearchInput) {
+                        globalSearchInput.focus();
+                    }
+                }
+            });
+
+            // 6. Auto-dismiss alerts after 4.5 seconds
+            const alerts = document.querySelectorAll('.messages-container .alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-10px)';
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 400);
+                }, 4500);
+            });
+        })();
+    </script>
+
+    <!-- Extra JavaScript per page -->
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>
