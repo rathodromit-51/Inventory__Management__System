@@ -132,7 +132,7 @@ MAILERS = {
 }
 
 
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.Profile'
 
 LOGIN_URL = "login"
 

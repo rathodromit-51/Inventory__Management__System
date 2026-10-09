@@ -47,6 +47,7 @@ def LoginView(request):
 
 
 # ==================================== Logout View =======================================
+@login_required
 def LogoutView(request):
     logout(request)
     return redirect('login') 
@@ -55,15 +56,14 @@ def LogoutView(request):
 def manager_dashboard(request):
     return render(request, 'accounts/manager_dashboard.html')
 
-def staff_dashboard(request):
-    return render(request, 'accounts/staff_dashboard.html')
 
 # ==================================== Home ====================================
+@login_required
 def home(request):
     user = request.user
     if user.role == 'admin':
-        return redirect('main')
+        return redirect('admin')
     elif user.role == 'manager':
         return redirect('manager_dashboard')
     else:
-        return redirect('staff_dashboard')
+        return render(request, 'dashboard/staff_dashboard.html')
