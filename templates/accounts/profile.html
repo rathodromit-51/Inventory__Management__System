@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}User Profile &mdash; InvenTrack{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h2>User Profile</h2>
+        <p>Personal profile details, active roles, and authorization status.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 620px;">
+    <div class="form-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="user-avatar" style="width: 52px; height: 52px; font-size: 1.35rem;">
+                {{ user.username|make_list|first|upper }}
+            </div>
+            <div>
+                <h3>{{ user.get_full_name|default:user.username }}</h3>
+                <span class="user-role-badge" style="font-size: 0.8rem;">Role: {{ user.role|default:"User" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-body">
+        <div class="spec-list">
+            <div class="spec-item">
+                <span class="spec-label">Username</span>
+                <span class="spec-value">{{ user.username }}</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Email Address</span>
+                <span class="spec-value">{{ user.email|default:"Not specified" }}</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Phone</span>
+                <span class="spec-value">{{ user.phone|default:"Not specified" }}</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Assigned Role</span>
+                <span class="spec-value"><span class="badge badge-info">{{ user.role|default:"Staff"|upper }}</span></span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Date Joined</span>
+                <span class="spec-value">{{ user.date_joined|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <a href="{% url 'logout' %}" class="btn btn-danger">
+            <i class="bx bx-log-out"></i> Log Out
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Stock Movements &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Audit trail and logs of all inventory stock in and stock out transactions.{% endblock %}
+
+{% block nav_stock %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h2>Stock Movements & Audit Log</h2>
+        <p>Complete historical ledger of all incoming stock, outgoing shipments, and inventory adjustments.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'add_stock' %}" class="btn btn-primary btn-sm">
+            <i class="bx bx-transfer-alt"></i> Record Stock Movement
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- TOOLBAR -->
+<div class="toolbar">
+    <div class="toolbar-search">
+        <i class="bx bx-search"></i>
+        <input type="text" id="stockSearchInput" placeholder="Filter by product, SKU, user, or note...">
+    </div>
+
+    <div class="toolbar-actions">
+        <select id="movementTypeFilter" class="form-control" style="width: auto; padding: 0.45rem 1rem; font-size: 0.85rem;">
+            <option value="">All Movements</option>
+            <option value="in">Stock In (Additions)</option>
+            <option value="out">Stock Out (Dispatches)</option>
+        </select>
+    </div>
+</div>
+
+<!-- TRANSACTIONS TABLE -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="stockTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Note / Reference</th>
+                    <th>Authorized By</th>
+                    <th>Date & Time</th>
+                    {% if user.role == 'admin' or user.is_superuser %}
+                    <th style="text-align: right;">Action</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in stock_transactions %}
+                <tr class="txn-row" data-type="{{ txn.transaction_type }}">
+                    <td>
+                        {% if txn.transaction_type == 'in' %}
+                            <span class="stock-pill stock-in">
+                                <i class="bx bx-down-arrow-alt"></i> Stock In
+                            </span>
+                        {% else %}
+                            <span class="stock-pill stock-out">
+                                <i class="bx bx-up-arrow-alt"></i> Stock Out
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: rgba(99, 102, 241, 0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                                <i class="bx bx-package"></i>
+                            </div>
+                            <div>
+                                <a href="{% url 'product_detail' txn.product.id %}" style="font-weight: 600; color: var(--color-text-main);">
+                                    {{ txn.product.name }}
+                                </a>
+                                <div style="font-size: 0.75rem; color: var(--color-text-muted); font-family: monospace;">
+                                    SKU: {{ txn.product.sku }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-size: 1rem; font-weight: 700; color: {% if txn.transaction_type == 'in' %}var(--color-success){% else %}var(--color-danger){% endif %};">
+                            {% if txn.transaction_type == 'in' %}+{% else %}-{% endif %}{{ txn.quantity }}
+                        </span>
+                        <span style="font-size: 0.75rem; color: var(--color-text-muted);">units</span>
+                    </td>
+                    <td>
+                        <span style="color: var(--color-text-secondary); font-size: 0.85rem;">
+                            {{ txn.note|default:"Standard Adjustment" }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <div class="user-avatar" style="width: 26px; height: 26px; font-size: 0.7rem;">
+                                {{ txn.user.username|default:"S"|make_list|first|upper }}
+                            </div>
+                            <span style="font-size: 0.85rem; color: var(--color-text-main);">
+                                {{ txn.user.username|default:"System" }}
+                            </span>
+                        </div>
+                    </td>
+                    <td style="color: var(--color-text-muted); font-size: 0.82rem;">
+                        {{ txn.created_at|date:"M d, Y H:i" }}
+                    </td>
+                    {% if user.role == 'admin' or user.is_superuser %}
+                    <td style="text-align: right;">
+                        <a href="{% url 'delete_stock' txn.id %}" class="btn btn-danger btn-sm" title="Remove log entry" style="padding: 0.35rem 0.6rem;" onclick="return confirm('Remove this transaction record? Note: This will not alter product stock levels.');">
+                            <i class="bx bx-trash"></i>
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bx bx-transfer-alt"></i>
+                            </div>
+                            <h3 class="empty-state-title">No stock movements yet</h3>
+                            <p class="empty-state-desc">All stock increments and decrements are recorded automatically here to give you a full audit trail.</p>
+                            <a href="{% url 'add_stock' %}" class="btn btn-primary">
+                                <i class="bx bx-plus"></i> Record Movement
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('stockSearchInput');
+        const filterType = document.getElementById('movementTypeFilter');
+        const rows = document.querySelectorAll('.txn-row');
+
+        function filterStock() {
+            const query = searchInput.value.toLowerCase().trim();
+            const type = filterType.value;
+
+            rows.forEach(function(row) {
+                const text = row.innerText.toLowerCase();
+                const rowType = row.getAttribute('data-type');
+
+                const matchesQuery = query === '' || text.includes(query);
+                const matchesType = type === '' || rowType === type;
+
+                row.style.display = (matchesQuery && matchesType) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterStock);
+        if (filterType) filterType.addEventListener('change', filterStock);
+    });
+</script>
+{% endblock %}

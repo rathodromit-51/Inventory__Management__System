@@ -1,0 +1,78 @@
+--{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Category Form" }} &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Create or update product category classification.{% endblock %}
+
+{% block nav_categories %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.82rem; color: var(--color-text-muted);">
+            <a href="{% url 'category_list' %}" style="color: var(--color-primary);"><i class="bx bx-left-arrow-alt"></i> Back to Categories</a>
+        </div>
+        <h2>{{ title|default:"Category Form" }}</h2>
+        <p>Define category grouping and department details.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 620px;">
+    <div class="form-header">
+        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bx bx-category-alt" style="color: var(--color-secondary);"></i>
+            <span>{{ title|default:"Category Information" }}</span>
+        </h3>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-body">
+            {% if form.non_field_errors %}
+                <div class="alert danger" style="margin-bottom: 1.5rem;">
+                    <div class="alert-content">
+                        <i class="bx bx-error-circle"></i>
+                        <span>{{ form.non_field_errors.0 }}</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Category Name -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.name.id_for_label }}">
+                    Category Name <span style="color: var(--color-danger);">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="form-errors">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.description.id_for_label }}">
+                    Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="form-errors">{{ form.description.errors.0 }}</div>
+                {% else %}
+                    <div class="form-help">Optional summary of items belonging to this category.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <a href="{% url 'category_list' %}" class="btn btn-secondary">
+                <i class="bx bx-x"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-check"></i> Save Category
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

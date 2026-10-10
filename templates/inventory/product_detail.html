@@ -1,0 +1,260 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} &mdash; Product Details &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Details, stock status, supplier specifications, and transaction logs for {{ product.name
+}}.{% endblock %}
+
+{% block nav_products %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <div
+            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.82rem; color: var(--color-text-muted);">
+            <a href="{% url 'product_list' %}" style="color: var(--color-primary);"><i class="bx bx-left-arrow-alt"></i>
+                Back to Catalog</a>
+            <span>&bull;</span>
+            <span>SKU: {{ product.sku }}</span>
+        </div>
+        <h2>{{ product.name }}</h2>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'update_stock' product.id %}" class="btn btn-secondary btn-sm">
+            <i class="bx bx-transfer-alt"></i> Adjust Stock
+        </a>
+        <a href="{% url 'update_product' product.id %}" class="btn btn-primary btn-sm">
+            <i class="bx bx-edit-alt"></i> Edit Product
+        </a>
+        {% if user.role == 'admin' or user.is_superuser %}
+        <a href="{% url 'delete_product' product.id %}" class="btn btn-danger btn-sm"
+            onclick="return confirm('Delete this product permanently?');">
+            <i class="bx bx-trash"></i> Delete
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="detail-grid" style="margin-bottom: 2rem;">
+    <!-- LEFT COLUMN: Product Specifications & Supplier Info -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+        <!-- Specifications Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-info-circle" style="color: var(--color-primary);"></i>
+                    Product Specifications
+                </h3>
+                <span class="badge badge-info" style="font-family: monospace;">{{ product.sku }}</span>
+            </div>
+
+            <div class="spec-list">
+                <div class="spec-item">
+                    <span class="spec-label">Product Name</span>
+                    <span class="spec-value">{{ product.name }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">SKU Code</span>
+                    <span class="spec-value" style="font-family: monospace;">{{ product.sku }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Category</span>
+                    <span class="spec-value">
+                        {% if product.category %}
+                        <a href="{% url 'category_list' %}" style="color: var(--color-primary);">{{ product.category.name }}</a>
+                        {% else %}
+                        <span style="color: var(--color-text-muted);">Uncategorized</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Unit Price</span>
+                    <span class="spec-value" style="font-size: 1.05rem; color: var(--color-success);">₹ {{ product.price }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Minimum Reorder Threshold</span>
+                    <span class="spec-value">{{ product.reorder_level }} units</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Date Added</span>
+                    <span class="spec-value">{{ product.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Last Modified</span>
+                    <span class="spec-value">{{ product.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+            </div>
+
+            {% if product.description %}
+            <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color);">
+                <span class="spec-label" style="display: block; margin-bottom: 0.5rem;">Description & Notes</span>
+                <p
+                    style="color: var(--color-text-secondary); font-size: 0.88rem; line-height: 1.6; white-space: pre-line;">
+                    {{ product.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Supplier Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-store-alt" style="color: var(--color-secondary);"></i>
+                    Supplier Details
+                </h3>
+                {% if product.supplier %}
+                <a href="{% url 'supplier_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                    View All Suppliers
+                </a>
+                {% endif %}
+            </div>
+
+            {% if product.supplier %}
+            <div class="spec-list">
+                <div class="spec-item">
+                    <span class="spec-label">Company / Vendor</span>
+                    <span class="spec-value">{{ product.supplier.name }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Email Address</span>
+                    <span class="spec-value">
+                        {% if product.supplier.email %}
+                        <a href="mailto:{{ product.supplier.email }}" style="color: var(--color-primary);">
+                            <i class="bx bx-envelope"></i> {{ product.supplier.email }}
+                        </a>
+                        {% else %}
+                        <span style="color: var(--color-text-muted);">None</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Phone</span>
+                    <span class="spec-value">
+                        {% if product.supplier.phone %}
+                        <a href="tel:{{ product.supplier.phone }}" style="color: var(--color-secondary);">
+                            <i class="bx bx-phone"></i> {{ product.supplier.phone }}
+                        </a>
+                        {% else %}
+                        <span style="color: var(--color-text-muted);">None</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% else %}
+            <div style="padding: 1.5rem; text-align: center; color: var(--color-text-muted); font-size: 0.88rem;">
+                <i class="bx bx-error" style="font-size: 1.75rem; display: block; margin-bottom: 0.5rem;"></i>
+                No supplier currently assigned to this product.
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Stock Status & Quick Adjustment -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+        <!-- Stock Level Indicator Card -->
+        <div class="card" style="text-align: center; padding: 2rem 1.5rem;">
+            <div style="margin-bottom: 1rem;">
+                <span class="stat-label">Current Stock Quantity</span>
+                <div
+                    style="font-size: 3.5rem; font-weight: 800; color: var(--color-text-main); line-height: 1.1; margin: 0.5rem 0;">
+                    {{ product.quantity }}
+                </div>
+                <div>
+                    {% if product.quantity == 0 %}
+                    <span class="stock-pill stock-out" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+                        <i class="bx bx-x-circle"></i> Out of Stock
+                    </span>
+                    {% elif product.quantity <= product.reorder_level %} <span class="stock-pill stock-low"
+                        style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+                        <i class="bx bx-error-alt"></i> Low Stock Alert (Min: {{ product.reorder_level }})
+                        </span>
+                        {% else %}
+                        <span class="stock-pill stock-in" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+                            <i class="bx bx-check-circle"></i> In Stock & Healthy
+                        </span>
+                        {% endif %}
+                </div>
+            </div>
+
+            <!-- Total Asset Value -->
+            <div
+                style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1.25rem;">
+                <span
+                    style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.05em; font-weight: 600;">Product
+                    Valuation</span>
+                <div style="font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin-top: 0.25rem;">
+                    {{ product.quantity|default:0|floatformat:2 }} &times; ₹ {{ product.price }}
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <a href="{% url 'update_stock' product.id %}" class="btn btn-primary" style="width: 100%;">
+                    <i class="bx bx-transfer-alt"></i> Adjust Stock Level
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- BOTTOM: Transaction History for this Product -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bx bx-history" style="color: var(--color-primary);"></i>
+            Transaction History for {{ product.name }}
+        </h3>
+        <a href="{% url 'add_stock' %}" class="btn btn-secondary btn-sm">
+            <i class="bx bx-plus"></i> New Movement
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Handled By</th>
+                    <th>Note / Reference</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in recent_transactions %}
+                <tr>
+                    <td>
+                        {% if txn.transaction_type == 'in' %}
+                        <span class="stock-pill stock-in">
+                            <i class="bx bx-down-arrow-alt"></i> Stock In
+                        </span>
+                        {% else %}
+                        <span class="stock-pill stock-out">
+                            <i class="bx bx-up-arrow-alt"></i> Stock Out
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td><strong style="color: var(--color-text-main);">{{ txn.quantity }} units</strong></td>
+                    <td>{{ txn.user.username|default:"System" }}</td>
+                    <td style="color: var(--color-text-secondary); font-size: 0.85rem;">{{ txn.note|default:"&mdash;" }}
+                    </td>
+                    <td style="color: var(--color-text-muted); font-size: 0.8rem;">{{ txn.created_at|date:"M d, Y H:i"
+                        }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+                        No movements logged for this product yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

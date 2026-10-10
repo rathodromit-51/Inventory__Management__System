@@ -1,0 +1,168 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Stock Transaction" }} &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Record stock receipts, deliveries, and physical inventory reconciliations.{% endblock %}
+
+{% block nav_stock %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; font-size: 0.82rem; color: var(--color-text-muted);">
+            <a href="{% url 'stock_list' %}" style="color: var(--color-primary);"><i class="bx bx-left-arrow-alt"></i> Back to Stock Logs</a>
+        </div>
+        <h2>{{ title|default:"Record Stock Movement" }}</h2>
+        <p>Log incoming product stock (receipts) or outgoing dispatches (deliveries / damage / adjustment).</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 680px;">
+    
+    {% if product %}
+    <!-- PRODUCT QUICK ADJUST HEADER -->
+    <div class="form-header" style="background: rgba(99, 102, 241, 0.05);">
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-primary); font-weight: 700; letter-spacing: 0.05em;">
+                Quick Adjustment For
+            </div>
+            <h3 style="margin-top: 0.2rem;">{{ product.name }}</h3>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted); font-family: monospace;">
+                SKU: {{ product.sku }}
+            </span>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size: 0.72rem; color: var(--color-text-muted); display: block;">Current Stock</span>
+            <span style="font-size: 1.5rem; font-weight: 800; color: var(--color-text-main);">
+                {{ product.quantity }}
+            </span>
+            <span style="font-size: 0.75rem; color: var(--color-text-muted);">units</span>
+        </div>
+    </div>
+
+    <!-- ADJUSTMENT POST FORM -->
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-body">
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Movement Type <span style="color: var(--color-danger);">*</span>
+                </label>
+                <select name="transaction_type" class="form-control" required id="id_transaction_type">
+                    <option value="in">&#x2193; Stock In (Add items to inventory)</option>
+                    <option value="out">&#x2191; Stock Out (Deduct items from inventory)</option>
+                </select>
+                <div class="form-help">Select whether stock is entering the warehouse or leaving it.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_quantity">
+                    Quantity to Adjust <span style="color: var(--color-danger);">*</span>
+                </label>
+                <input type="number" name="quantity" id="id_quantity" class="form-control" min="1" placeholder="e.g. 10" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_note">
+                    Note / Adjustment Reason
+                </label>
+                <textarea name="note" id="id_note" class="form-control" rows="3" placeholder="e.g. Purchase Order #450, Warehouse reconciliation, Damaged stock..."></textarea>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <a href="{% url 'product_detail' product.id %}" class="btn btn-secondary">
+                <i class="bx bx-x"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-check"></i> Apply Adjustment
+            </button>
+        </div>
+    </form>
+
+    {% else %}
+    <!-- GENERAL STOCK MOVEMENT FORM -->
+    <div class="form-header">
+        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bx bx-transfer-alt" style="color: var(--color-primary);"></i>
+            <span>{{ title|default:"Log Stock Movement" }}</span>
+        </h3>
+        <span class="badge badge-info">Audit Transaction</span>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-body">
+            
+            {% if form.non_field_errors %}
+                <div class="alert danger" style="margin-bottom: 1.5rem;">
+                    <div class="alert-content">
+                        <i class="bx bx-error-circle"></i>
+                        <span>{{ form.non_field_errors.0 }}</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Target Product -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.product.id_for_label }}">
+                    Select Product <span style="color: var(--color-danger);">*</span>
+                </label>
+                {{ form.product }}
+                {% if form.product.errors %}
+                    <div class="form-errors">{{ form.product.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Transaction Type -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.transaction_type.id_for_label }}">
+                    Movement Type <span style="color: var(--color-danger);">*</span>
+                </label>
+                {{ form.transaction_type }}
+                {% if form.transaction_type.errors %}
+                    <div class="form-errors">{{ form.transaction_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Quantity -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.quantity.id_for_label }}">
+                    Quantity Units <span style="color: var(--color-danger);">*</span>
+                </label>
+                {{ form.quantity }}
+                {% if form.quantity.errors %}
+                    <div class="form-errors">{{ form.quantity.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Note / Reason -->
+            <div class="form-group">
+                <label class="form-label" for="{{ form.note.id_for_label }}">
+                    Reference Note / Reason
+                </label>
+                {{ form.note }}
+                {% if form.note.errors %}
+                    <div class="form-errors">{{ form.note.errors.0 }}</div>
+                {% else %}
+                    <div class="form-help">Purchase Order number, supplier reference, or reason for write-off.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <a href="{% url 'stock_list' %}" class="btn btn-secondary">
+                <i class="bx bx-x"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-check"></i> Commit Movement
+            </button>
+        </div>
+    </form>
+    {% endif %}
+
+</div>
+{% endblock %}

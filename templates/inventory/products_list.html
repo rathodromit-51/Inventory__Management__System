@@ -1,0 +1,210 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Products Catalog &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Manage and monitor inventory items, stock levels, categories, and SKU tracking.{% endblock %}
+
+{% block nav_products %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h2>Products Catalog</h2>
+        <p>Manage inventory items, monitor stock levels, SKU codes, and suppliers.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'add_stock' %}" class="btn btn-secondary btn-sm">
+            <i class="bx bx-transfer-alt"></i> Stock Movement
+        </a>
+        <a href="{% url 'add_product' %}" class="btn btn-primary btn-sm">
+            <i class="bx bx-plus"></i> Add New Product
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- FILTER & SEARCH TOOLBAR -->
+<div class="toolbar">
+    <div class="toolbar-search">
+        <i class="bx bx-search"></i>
+        <input type="text" id="productSearchInput" placeholder="Filter by product name, SKU, or supplier...">
+    </div>
+
+    <div class="toolbar-actions">
+        <select id="categoryFilter" class="form-control" style="width: auto; padding: 0.45rem 1rem; font-size: 0.85rem;">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.name|lower }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="stockStatusFilter" class="form-control" style="width: auto; padding: 0.45rem 1rem; font-size: 0.85rem;">
+            <option value="">All Stock Levels</option>
+            <option value="in-stock">In Stock</option>
+            <option value="low-stock">Low Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+        </select>
+    </div>
+</div>
+
+<!-- PRODUCTS DATA CARD -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="productsTable">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Supplier</th>
+                    <th>Price</th>
+                    <th>Stock Level</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in products %}
+                <tr class="product-row" 
+                    data-category="{{ prod.category.name|default:''|lower }}"
+                    data-status="{% if prod.quantity == 0 %}out-of-stock{% elif prod.quantity <= prod.reorder_level %}low-stock{% else %}in-stock{% endif %}">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: rgba(99, 102, 241, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                                <i class="bx bx-package"></i>
+                            </div>
+                            <div>
+                                <a href="{% url 'product_detail' prod.id %}" style="font-weight: 600; color: var(--color-text-main); font-size: 0.92rem;">
+                                    {{ prod.name }}
+                                </a>
+                                {% if prod.description %}
+                                <div style="font-size: 0.75rem; color: var(--color-text-muted); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ prod.description }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-info" style="font-family: monospace; letter-spacing: 0.04em;">
+                            {{ prod.sku }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if prod.category %}
+                            <span class="badge badge-secondary" style="background: rgba(255, 255, 255, 0.05); color: var(--color-text-secondary); border: 1px solid var(--border-color);">
+                                {{ prod.category.name }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--color-text-muted); font-size: 0.8rem;">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if prod.supplier %}
+                            <span style="color: var(--color-text-secondary); font-size: 0.85rem;">{{ prod.supplier.name }}</span>
+                        {% else %}
+                            <span style="color: var(--color-text-muted); font-size: 0.8rem;">&mdash;</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong style="color: var(--color-text-main); font-size: 0.92rem;">₹{{ prod.price }}</strong>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <strong style="font-size: 1rem; color: var(--color-text-main);">{{ prod.quantity }}</strong>
+                            <span style="font-size: 0.75rem; color: var(--color-text-muted);">/ min {{ prod.reorder_level }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if prod.quantity == 0 %}
+                            <span class="stock-pill stock-out">
+                                <i class="bx bx-x-circle"></i> Out of Stock
+                            </span>
+                        {% elif prod.quantity <= prod.reorder_level %}
+                            <span class="stock-pill stock-low">
+                                <i class="bx bx-error-alt"></i> Low Stock
+                            </span>
+                        {% else %}
+                            <span class="stock-pill stock-in">
+                                <i class="bx bx-check-circle"></i> In Stock
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <a href="{% url 'update_stock' prod.id %}" class="btn btn-secondary btn-sm" title="Quick Adjust Stock" style="padding: 0.35rem 0.6rem;">
+                                <i class="bx bx-transfer-alt"></i>
+                            </a>
+                            <a href="{% url 'product_detail' prod.id %}" class="btn btn-secondary btn-sm" title="View details" style="padding: 0.35rem 0.6rem;">
+                                <i class="bx bx-show"></i>
+                            </a>
+                            <a href="{% url 'update_product' prod.id %}" class="btn btn-secondary btn-sm" title="Edit product" style="padding: 0.35rem 0.6rem;">
+                                <i class="bx bx-edit-alt"></i>
+                            </a>
+                            {% if user.role == 'admin' or user.is_superuser %}
+                            <a href="{% url 'delete_product' prod.id %}" class="btn btn-danger btn-sm" title="Delete product" style="padding: 0.35rem 0.6rem;" onclick="return confirm('Are you sure you want to delete product {{ prod.name|escapejs }}?');">
+                                <i class="bx bx-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bx bx-box"></i>
+                            </div>
+                            <h3 class="empty-state-title">No products found</h3>
+                            <p class="empty-state-desc">Your inventory catalog is currently empty. Start adding items to track quantities and movements.</p>
+                            <a href="{% url 'add_product' %}" class="btn btn-primary">
+                                <i class="bx bx-plus"></i> Add First Product
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('productSearchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const stockFilter = document.getElementById('stockStatusFilter');
+        const rows = document.querySelectorAll('.product-row');
+
+        function filterProducts() {
+            const query = searchInput.value.toLowerCase().trim();
+            const selectedCat = categoryFilter.value.toLowerCase();
+            const selectedStock = stockFilter.value;
+
+            rows.forEach(function(row) {
+                const text = row.innerText.toLowerCase();
+                const rowCat = row.getAttribute('data-category');
+                const rowStatus = row.getAttribute('data-status');
+
+                const matchesQuery = query === '' || text.includes(query);
+                const matchesCat = selectedCat === '' || rowCat.includes(selectedCat);
+                const matchesStock = selectedStock === '' || rowStatus === selectedStock;
+
+                if (matchesQuery && matchesCat && matchesStock) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterProducts);
+        if (categoryFilter) categoryFilter.addEventListener('change', filterProducts);
+        if (stockFilter) stockFilter.addEventListener('change', filterProducts);
+    });
+</script>
+{% endblock %}

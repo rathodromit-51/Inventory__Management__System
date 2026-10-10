@@ -1,0 +1,1551 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <!-- SEO Meta Tags -->
+    <title>InvenTrack &mdash; Next-Gen Inventory Management & Stock Operations Platform</title>
+    <meta name="description" content="InvenTrack is an enterprise-grade inventory management system for real-time stock tracking, low-stock reorder alerts, supplier directory, and immutable transaction audit logs.">
+    <meta name="keywords" content="inventory management, stock tracking, warehouse management system, supply chain, SKU management, stock audit">
+    <meta name="author" content="InvenTrack">
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Boxicons Icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           INVENTRACK LANDING PAGE STYLESHEET
+           ========================================================================== */
+        :root {
+            --bg-dark: #080c14;
+            --bg-surface: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-card-hover: rgba(51, 65, 85, 0.8);
+            
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --secondary: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+
+            --text-main: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --border: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(99, 102, 241, 0.4);
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 22px;
+            --radius-full: 9999px;
+
+            --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --gradient-glow: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.18), transparent 70%);
+            --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 15px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 75%, rgba(6, 182, 212, 0.08) 0%, transparent 55%);
+            background-attachment: fixed;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        /* Container helper */
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* --------------------------------------------------------------------------
+           1. TOP NAVIGATION BAR
+           -------------------------------------------------------------------------- */
+        .landing-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 76px;
+            background: rgba(8, 12, 20, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .landing-nav.scrolled {
+            background: rgba(8, 12, 20, 0.95);
+            border-bottom-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: var(--gradient-brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo:hover .brand-icon {
+            transform: rotate(6deg) scale(1.05);
+        }
+
+        .brand-text h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: #fff;
+        }
+
+        .brand-text span {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-link-item a {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.92rem;
+            position: relative;
+            padding: 0.35rem 0;
+        }
+
+        .nav-link-item a:hover {
+            color: #fff;
+        }
+
+        .nav-link-item a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.25s ease;
+            border-radius: 2px;
+        }
+
+        .nav-link-item a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.35rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.55);
+        }
+
+        .btn-glow {
+            background: var(--gradient-brand);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.45);
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.65);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: var(--border-highlight);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.82rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.75rem;
+            color: var(--text-main);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* --------------------------------------------------------------------------
+           2. HERO SECTION
+           -------------------------------------------------------------------------- */
+        .hero {
+            padding-top: 150px;
+            padding-bottom: 90px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius-full);
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #c7d2fe;
+            margin-bottom: 1.75rem;
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+            100% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.5); }
+        }
+
+        .hero-pill i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .hero h1 {
+            font-size: 3.6rem;
+            font-weight: 900;
+            line-height: 1.12;
+            letter-spacing: -0.04em;
+            max-width: 980px;
+            margin: 0 auto 1.5rem;
+            color: #fff;
+        }
+
+        .gradient-text {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.18rem;
+            color: var(--text-secondary);
+            max-width: 720px;
+            margin: 0 auto 2.5rem;
+            font-weight: 400;
+            line-height: 1.65;
+        }
+
+        .hero-ctas {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-trust {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .trust-item i {
+            color: var(--success);
+            font-size: 1.1rem;
+        }
+
+        /* --------------------------------------------------------------------------
+           3. INTERACTIVE MOCKUP SHOWCASE
+           -------------------------------------------------------------------------- */
+        .mockup-wrapper {
+            margin-top: 3.5rem;
+            position: relative;
+        }
+
+        .mockup-window {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.2);
+            overflow: hidden;
+            text-align: left;
+            position: relative;
+        }
+
+        .mockup-topbar {
+            height: 48px;
+            background: #1e293b;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+        }
+
+        .window-dots {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ef4444; }
+        .dot-yellow { background: #f59e0b; }
+        .dot-green { background: #10b981; }
+
+        .mockup-search {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            padding: 0.25rem 1rem;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 320px;
+        }
+
+        .mockup-body {
+            padding: 1.75rem;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 1.5rem;
+            background: #0b0f19;
+            min-height: 480px;
+        }
+
+        .mockup-sidebar {
+            background: #111827;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mockup-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .mockup-nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .mockup-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .mockup-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .m-stat-card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+        }
+
+        .m-stat-card .label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .m-stat-card .val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 0.2rem;
+        }
+
+        .mockup-table-card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            flex: 1;
+        }
+
+        .mockup-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .mockup-table th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mockup-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .pill-in { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .pill-out { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        /* --------------------------------------------------------------------------
+           4. NUMBERS / IMPACT METRICS BAR
+           -------------------------------------------------------------------------- */
+        .metrics-banner {
+            padding: 50px 0;
+            background: rgba(15, 23, 42, 0.6);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin-top: 4rem;
+            margin-bottom: 80px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .metric-num {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .metric-label {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* --------------------------------------------------------------------------
+           5. FEATURES SECTION
+           -------------------------------------------------------------------------- */
+        .section-header {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 3.5rem;
+        }
+
+        .section-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .section-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 0.85rem;
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+            margin-bottom: 90px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.75rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-highlight);
+            background: var(--bg-card-hover);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 25px rgba(99, 102, 241, 0.15);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .f-icon-indigo { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+        .f-icon-cyan { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+        .f-icon-purple { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        .f-icon-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .f-icon-green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .f-icon-pink { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.65rem;
+        }
+
+        .feature-card p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* --------------------------------------------------------------------------
+           6. WORKFLOW / HOW IT WORKS SECTION
+           -------------------------------------------------------------------------- */
+        .workflow-section {
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            position: relative;
+        }
+
+        .step-card {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem 1.75rem;
+            position: relative;
+            text-align: left;
+        }
+
+        .step-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--gradient-brand);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .step-card h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* --------------------------------------------------------------------------
+           7. SPLIT SHOWCASE (FEATURE SPOTLIGHT)
+           -------------------------------------------------------------------------- */
+        .spotlight-section {
+            padding: 80px 0;
+        }
+
+        .spotlight-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .spotlight-grid.reverse {
+            direction: rtl;
+        }
+
+        .spotlight-grid.reverse > * {
+            direction: ltr;
+        }
+
+        .spotlight-text h3 {
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+        }
+
+        .spotlight-text p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .checklist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .checklist-item i {
+            color: var(--success);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .spotlight-card {
+            background: #111827;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        /* --------------------------------------------------------------------------
+           8. FAQ SECTION
+           -------------------------------------------------------------------------- */
+        .faq-section {
+            padding: 80px 0;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .faq-question {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 600;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .faq-question i {
+            font-size: 1.35rem;
+            color: var(--primary);
+            transition: transform 0.25s ease;
+        }
+
+        .faq-item.open .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem 1.25rem;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+
+        /* --------------------------------------------------------------------------
+           9. CALL TO ACTION BANNER
+           -------------------------------------------------------------------------- */
+        .cta-banner {
+            padding: 80px 0;
+        }
+
+        .cta-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.25) 50%, rgba(236, 72, 153, 0.2) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: var(--radius-lg);
+            padding: 4.5rem 2.5rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .cta-card h2 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+
+        .cta-card p {
+            font-size: 1.15rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        /* --------------------------------------------------------------------------
+           10. LANDING FOOTER
+           -------------------------------------------------------------------------- */
+        .landing-footer {
+            background: #080c14;
+            border-top: 1px solid var(--border);
+            padding: 60px 0 35px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 50px;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+
+        .footer-col h5 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #fff;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-col a {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+        }
+
+        .footer-col a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            padding-top: 25px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .system-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--success);
+        }
+
+        .pulse-indicator {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .hero h1 { font-size: 2.8rem; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid { grid-template-columns: 1fr; }
+            .spotlight-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .mockup-body { grid-template-columns: 1fr; }
+            .mockup-sidebar { display: none; }
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .mockup-stats { grid-template-columns: 1fr; }
+            .cta-card h2 { font-size: 2rem; }
+            .cta-card { padding: 3rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. FIXED LANDING NAVIGATION BAR -->
+    <header class="landing-nav" id="landingNav">
+        <div class="container nav-inner">
+            <!-- Brand Logo -->
+            <a href="{% url 'home' %}" class="brand-logo" id="brandLogo">
+                <div class="brand-icon">
+                    <i class="bx bx-cube-alt"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>InvenTrack</h1>
+                    <span>Enterprise Edition</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <ul class="nav-links">
+                <li class="nav-link-item"><a href="#features">Features</a></li>
+                <li class="nav-link-item"><a href="#platform">Platform</a></li>
+                <li class="nav-link-item"><a href="#workflow">Workflow</a></li>
+                <li class="nav-link-item"><a href="#metrics">Metrics</a></li>
+                <li class="nav-link-item"><a href="#faq">FAQ</a></li>
+            </ul>
+
+            <!-- Action Buttons -->
+            <div class="nav-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm" id="navDashboardBtn">
+                        <i class="bx bxs-dashboard"></i> Open Dashboard
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn btn-outline btn-sm" title="Sign Out">
+                        <i class="bx bx-log-out"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline btn-sm" id="navLoginBtn">
+                        <i class="bx bx-log-in"></i> Sign In
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-sm" id="navRegisterBtn">
+                        Get Started Free
+                    </a>
+                {% endif %}
+                <button type="button" class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle navigation">
+                    <i class="bx bx-menu"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <!-- Announcement Pill -->
+            <div class="hero-pill">
+                <i class="bx bxs-zap"></i>
+                <span>InvenTrack 2.0 &bull; Intelligent Warehouse & Inventory Ledger</span>
+            </div>
+
+            <!-- Primary Headline -->
+            <h1>
+                Master Your Inventory with <br>
+                <span class="gradient-text">Speed, Precision & Absolute Visibility</span>
+            </h1>
+
+            <!-- Subtitle -->
+            <p>
+                Eliminate unexpected stockouts, automate reorder thresholds, track vendors, and maintain an immutable audit trail of every stock movement across your entire enterprise.
+            </p>
+
+            <!-- Hero Action Buttons -->
+            <div class="hero-ctas">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-glow" style="padding: 0.85rem 1.85rem; font-size: 1.05rem;" id="heroConsoleBtn">
+                        <i class="bx bxs-dashboard"></i> Launch Inventory Console
+                    </a>
+                    <a href="{% url 'product_list' %}" class="btn btn-outline" style="padding: 0.85rem 1.85rem; font-size: 1.05rem;" id="heroCatalogBtn">
+                        <i class="bx bx-package"></i> Browse Products ({{ total_products|default:"Catalog" }})
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="btn btn-glow" style="padding: 0.85rem 1.85rem; font-size: 1.05rem;" id="heroRegisterBtn">
+                        <i class="bx bx-rocket"></i> Start Free Today
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline" style="padding: 0.85rem 1.85rem; font-size: 1.05rem;" id="heroLoginBtn">
+                        <i class="bx bx-lock-open-alt"></i> Access Portal
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="hero-trust">
+                <div class="trust-item">
+                    <i class="bx bx-check-shield"></i>
+                    <span>Role-Based Permissions</span>
+                </div>
+                <div class="trust-item">
+                    <i class="bx bx-transfer-alt"></i>
+                    <span>Real-time Inbound & Outbound</span>
+                </div>
+                <div class="trust-item">
+                    <i class="bx bx-bell"></i>
+                    <span>Low-Stock Alerts</span>
+                </div>
+                <div class="trust-item">
+                    <i class="bx bx-data"></i>
+                    <span>Immutable Audit Log</span>
+                </div>
+            </div>
+
+            <!-- 3. INTERACTIVE MOCKUP SHOWCASE WINDOW -->
+            <div class="mockup-wrapper">
+                <div class="mockup-window">
+                    <div class="mockup-topbar">
+                        <div class="window-dots">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                        </div>
+                        <div class="mockup-search">
+                            <i class="bx bx-search"></i>
+                            <span>Search inventory, SKU, and suppliers...</span>
+                            <span style="margin-left: auto; font-size: 0.65rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">Ctrl+K</span>
+                        </div>
+                        <div style="font-size: 0.72rem; color: #10b981; display: flex; align-items: center; gap: 0.4rem;">
+                            <span class="pulse-indicator"></span> Live Feed
+                        </div>
+                    </div>
+
+                    <div class="mockup-body">
+                        <!-- Sidebar preview -->
+                        <div class="mockup-sidebar">
+                            <div class="mockup-nav-item active"><i class="bx bxs-dashboard"></i> Dashboard</div>
+                            <div class="mockup-nav-item"><i class="bx bx-package"></i> Products Catalog</div>
+                            <div class="mockup-nav-item"><i class="bx bx-category-alt"></i> Categories</div>
+                            <div class="mockup-nav-item"><i class="bx bx-store-alt"></i> Suppliers</div>
+                            <div class="mockup-nav-item"><i class="bx bx-transfer-alt"></i> Stock Movements</div>
+                        </div>
+
+                        <!-- Content preview -->
+                        <div class="mockup-content">
+                            <!-- Stats preview -->
+                            <div class="mockup-stats">
+                                <div class="m-stat-card">
+                                    <div class="label">Total Products</div>
+                                    <div class="val">{{ total_products|default:"1,248" }}</div>
+                                </div>
+                                <div class="m-stat-card">
+                                    <div class="label">Movements Logged</div>
+                                    <div class="val">{{ total_transactions|default:"8,920" }}</div>
+                                </div>
+                                <div class="m-stat-card">
+                                    <div class="label">Registered Suppliers</div>
+                                    <div class="val" style="color: var(--secondary);">{{ total_suppliers|default:"84" }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Table Preview -->
+                            <div class="mockup-table-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                    <strong style="font-size: 0.88rem; color: #fff;">Live Movements Ledger</strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time Sync</span>
+                                </div>
+                                <table class="mockup-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Item Name</th>
+                                            <th>SKU</th>
+                                            <th>Quantity</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge-pill pill-in"><i class="bx bx-down-arrow-alt"></i> IN</span></td>
+                                            <td>Industrial Servo Motor</td>
+                                            <td style="font-family: monospace;">IND-994</td>
+                                            <td><strong>+45 units</strong></td>
+                                            <td><span style="color: #10b981; font-weight: 600;">Stock Updated</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge-pill pill-out"><i class="bx bx-up-arrow-alt"></i> OUT</span></td>
+                                            <td>Ceramic Capacitors (100uF)</td>
+                                            <td style="font-family: monospace;">CAP-201</td>
+                                            <td><strong>-250 units</strong></td>
+                                            <td><span style="color: #f59e0b; font-weight: 600;">Dispatched</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge-pill pill-in"><i class="bx bx-down-arrow-alt"></i> IN</span></td>
+                                            <td>Titanium Fasteners M6</td>
+                                            <td style="font-family: monospace;">FST-808</td>
+                                            <td><strong>+1,200 units</strong></td>
+                                            <td><span style="color: #10b981; font-weight: 600;">Stock Updated</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. IMPACT NUMBERS / METRICS SECTION -->
+    <section class="metrics-banner" id="metrics">
+        <div class="container">
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <span class="metric-num">{{ total_products|default:"2,400" }}+</span>
+                    <span class="metric-label">Tracked Catalog Items</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-num">{{ total_transactions|default:"100" }}%</span>
+                    <span class="metric-label">Audit Ledger Traceability</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-num">&lt; 1s</span>
+                    <span class="metric-label">Real-Time Stock Updates</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-num">{{ total_suppliers|default:"99.9" }}%</span>
+                    <span class="metric-label">Operational Reliability</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. CORE FEATURES SECTION -->
+    <section class="container" id="features" style="padding: 60px 1.5rem;">
+        <div class="section-header">
+            <span class="section-tag">Enterprise Capabilities</span>
+            <h2 class="section-title">Everything Needed to Run a Flawless Warehouse</h2>
+            <p class="section-desc">From intake receipts to dispatch manifests, InvenTrack unifies every layer of your supply chain.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-icon f-icon-indigo">
+                    <i class="bx bx-transfer-alt"></i>
+                </div>
+                <h3>Stock In & Out Ledgers</h3>
+                <p>Record every inventory increase or deduction with single-click accuracy. Maintain strict attribution of authorized operators and movement notes.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-icon f-icon-amber">
+                    <i class="bx bx-bell"></i>
+                </div>
+                <h3>Intelligent Reorder Alerts</h3>
+                <p>Define custom minimum reorder thresholds for each SKU. Receive immediate visual warnings before critical items run out of stock.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-icon f-icon-cyan">
+                    <i class="bx bx-category-alt"></i>
+                </div>
+                <h3>Hierarchical Categorization</h3>
+                <p>Structure products by category, family, and department. Filter and manage thousands of products effortlessly without lag.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card">
+                <div class="feature-icon f-icon-green">
+                    <i class="bx bx-store-alt"></i>
+                </div>
+                <h3>Supplier Directory</h3>
+                <p>Maintain centralized contact points for all procurement vendors. Access direct email and phone channels for swift replenishment.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="feature-card">
+                <div class="feature-icon f-icon-purple">
+                    <i class="bx bx-shield-quarter"></i>
+                </div>
+                <h3>Role-Based Governance</h3>
+                <p>Protect warehouse integrity with strict permission tiers for Staff, Managers, and System Administrators.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="feature-card">
+                <div class="feature-icon f-icon-pink">
+                    <i class="bx bx-dollar-circle"></i>
+                </div>
+                <h3>Total Asset Valuation</h3>
+                <p>Instantly calculate the live monetary value of all inventory assets on hand with automated price-by-quantity aggregation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. OPERATIONS WORKFLOW (HOW IT WORKS) -->
+    <section class="workflow-section" id="workflow">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">How It Works</span>
+                <h2 class="section-title">Streamlined from Inbound to Outbound</h2>
+                <p class="section-desc">Get your warehouse operating at peak precision in three straightforward steps.</p>
+            </div>
+
+            <div class="steps-grid">
+                <!-- Step 1 -->
+                <div class="step-card">
+                    <div class="step-badge">1</div>
+                    <h4>Catalog & Set Thresholds</h4>
+                    <p>Register your SKUs with unit prices, assign vendor suppliers, and specify custom minimum reorder levels.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-card">
+                    <div class="step-badge">2</div>
+                    <h4>Log Receipts & Movements</h4>
+                    <p>Record stock inflows and outbound dispatches seamlessly. Quantities update instantly across the entire system.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card">
+                    <div class="step-badge">3</div>
+                    <h4>Restock on Trigger</h4>
+                    <p>Monitor dashboard warning alerts, trigger supplier replenishments, and audit full movement logs anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. PLATFORM SPOTLIGHT DEEP-DIVE -->
+    <section class="spotlight-section" id="platform">
+        <div class="container">
+            <!-- Spotlight 1 -->
+            <div class="spotlight-grid">
+                <div class="spotlight-text">
+                    <span class="section-tag">Immutable Audit Trail</span>
+                    <h3>Never Wonder Where Inventory Went</h3>
+                    <p>Every single stock movement creates an auditable historical log with operator attribution, precise timestamps, and custom notes.</p>
+                    <ul class="checklist">
+                        <li class="checklist-item"><i class="bx bx-check-circle"></i> Instant directional indicators (Stock In / Stock Out)</li>
+                        <li class="checklist-item"><i class="bx bx-check-circle"></i> Complete traceability of authorized operators</li>
+                        <li class="checklist-item"><i class="bx bx-check-circle"></i> Historical ledger preventing inventory shrinkage</li>
+                    </ul>
+                    <a href="{% url 'stock_list' %}" class="btn btn-primary btn-sm">
+                        <i class="bx bx-transfer-alt"></i> View Stock Ledger
+                    </a>
+                </div>
+
+                <div class="spotlight-card">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bx bx-history" style="color: var(--primary);"></i>
+                        Audit Trail Snapshot
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.82rem; color: #94a3b8; line-height: 1.8;">
+                        <div>[2026-10-09 14:22] <span style="color: #10b981;">STOCK_IN</span> +150 &rarr; SKU: ELEC-042 (PO #8841)</div>
+                        <div>[2026-10-09 14:50] <span style="color: #ef4444;">STOCK_OUT</span> -30 &rarr; SKU: MECH-109 (Customer Order)</div>
+                        <div>[2026-10-09 15:10] <span style="color: #f59e0b;">ALERT_LOW</span> SKU: RAW-004 stock below threshold (4 &lt; 10)</div>
+                        <div>[2026-10-09 15:35] <span style="color: #10b981;">RESTOCK_OK</span> +50 &rarr; SKU: RAW-004 (Replenished)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. FREQUENTLY ASKED QUESTIONS (FAQ) -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Frequently Asked Questions</span>
+                <h2 class="section-title">Got Questions? We Have Answers</h2>
+                <p class="section-desc">Learn how InvenTrack accelerates warehouse tracking, governance, and reporting.</p>
+            </div>
+
+            <div class="faq-container">
+                <div class="faq-item open">
+                    <div class="faq-question">
+                        <span>How does the low-stock alert system work?</span>
+                        <i class="bx bx-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Each product has a customizable minimum reorder threshold. Whenever a stock deduction brings the quantity at or below this threshold, InvenTrack immediately flags the product with a warning indicator and generates an urgent restock card on the dashboard.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I assign vendors directly to products?</span>
+                        <i class="bx bx-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! You can register multiple suppliers in the Supplier Directory with their phone and email credentials. Products can be linked directly to their primary vendor for streamlined replenishment.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How are user permissions and roles managed?</span>
+                        <i class="bx bx-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        InvenTrack provides three tiers of authorization: Staff (read & log movements), Managers (create & update catalog products and suppliers), and Administrators (system-wide control including product deletions).
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I quickly adjust stock without creating full purchase orders?</span>
+                        <i class="bx bx-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, every product detail card features a "Quick Stock Adjustment" tool where operators can log incoming units or damage write-offs in just a few clicks.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. CALL TO ACTION BANNER -->
+    <section class="cta-banner">
+        <div class="container">
+            <div class="cta-card">
+                <h2>Take Absolute Control of Your Warehouse</h2>
+                <p>Join operations managers who eliminated manual stock counting errors and achieved real-time visibility.</p>
+                <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-glow" style="padding: 0.85rem 2rem; font-size: 1.05rem;">
+                            <i class="bx bxs-dashboard"></i> Enter Inventory Console
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-glow" style="padding: 0.85rem 2rem; font-size: 1.05rem;">
+                            <i class="bx bx-user-plus"></i> Register Free Account
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 1.05rem;">
+                            <i class="bx bx-log-in"></i> Sign In to Existing Account
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10. LANDING FOOTER -->
+    <footer class="landing-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Brand Column -->
+                <div class="footer-brand">
+                    <a href="{% url 'home' %}" class="brand-logo">
+                        <div class="brand-icon">
+                            <i class="bx bx-cube-alt"></i>
+                        </div>
+                        <div class="brand-text">
+                            <h1>InvenTrack</h1>
+                            <span>Inventory Pro</span>
+                        </div>
+                    </a>
+                    <p>
+                        High-performance inventory tracking, audit logging, and supply chain visibility built for high-throughput teams.
+                    </p>
+                </div>
+
+                <!-- Navigation -->
+                <div class="footer-col">
+                    <h5>Catalog</h5>
+                    <ul>
+                        <li><a href="{% url 'product_list' %}">All Products</a></li>
+                        <li><a href="{% url 'category_list' %}">Categories</a></li>
+                        <li><a href="{% url 'supplier_list' %}">Suppliers</a></li>
+                        <li><a href="{% url 'stock_list' %}">Movements Ledger</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="footer-col">
+                    <h5>Workspace</h5>
+                    <ul>
+                        <li><a href="{% url 'dashboard' %}">Executive Dashboard</a></li>
+                        <li><a href="{% url 'add_product' %}">Add New Product</a></li>
+                        <li><a href="{% url 'add_stock' %}">Log Stock Movement</a></li>
+                        <li><a href="{% url 'add_supplier' %}">Register Supplier</a></li>
+                    </ul>
+                </div>
+
+                <!-- Auth & Account -->
+                <div class="footer-col">
+                    <h5>Access</h5>
+                    <ul>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'dashboard' %}">Logged in as {{ user.username }}</a></li>
+                            <li><a href="{% url 'logout' %}">Sign Out</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}">Sign In</a></li>
+                            <li><a href="{% url 'register' %}">Create Account</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>
+                    &copy; {% now "Y" %} <strong>InvenTrack</strong> &mdash; Modern Inventory Management System. All rights reserved.
+                </div>
+                <div class="system-badge">
+                    <span class="pulse-indicator"></span>
+                    <span>All Systems Operational</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive JS Utilities -->
+    <script>
+        (function() {
+            // 1. Sticky Navbar shadow on scroll
+            const nav = document.getElementById('landingNav');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 30) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+            });
+
+            // 2. Interactive FAQ Accordion
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(function(item) {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', function() {
+                    const isOpen = item.classList.contains('open');
+                    // Close all
+                    faqItems.forEach(function(i) { i.classList.remove('open'); });
+                    // Toggle current
+                    if (!isOpen) {
+                        item.classList.add('open');
+                    }
+                });
+            });
+
+            // 3. Mobile Navigation Menu Toggle
+            const mobileBtn = document.getElementById('mobileMenuToggle');
+            const navLinks = document.querySelector('.nav-links');
+            if (mobileBtn && navLinks) {
+                mobileBtn.addEventListener('click', function() {
+                    const isVisible = navLinks.style.display === 'flex';
+                    navLinks.style.display = isVisible ? 'none' : 'flex';
+                    if (!isVisible) {
+                        navLinks.style.flexDirection = 'column';
+                        navLinks.style.position = 'absolute';
+                        navLinks.style.top = '76px';
+                        navLinks.style.left = '0';
+                        navLinks.style.right = '0';
+                        navLinks.style.background = '#080c14';
+                        navLinks.style.padding = '1.5rem';
+                        navLinks.style.borderBottom = '1px solid var(--border)';
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

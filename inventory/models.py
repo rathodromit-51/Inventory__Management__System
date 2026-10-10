@@ -65,6 +65,8 @@ class Product(models.Model):
     def __str__(self) -> str:
         return self.name
     
+from django.conf import settings
+
 # ============================================ STOCK TRANSITION =================================================
 class StockTransaction(models.Model):
     
@@ -74,9 +76,9 @@ class StockTransaction(models.Model):
     ]
     
     product = models.ForeignKey(
-        Category,
-        on_delete= models.CASCADE,
-        related_name='transition'
+        Product,
+        on_delete=models.CASCADE,
+        related_name='transactions'
     )
     
     transaction_type  = models.CharField(  max_length=10, choices=TRANSITION_CHOICE)
@@ -84,9 +86,10 @@ class StockTransaction(models.Model):
     quantity = models.PositiveIntegerField()
     
     user = models.ForeignKey(
-        'accounts.User',
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
     
     note = models.TextField(blank=True)

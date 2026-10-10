@@ -1,0 +1,137 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Suppliers Directory &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Directory of inventory suppliers, vendor contacts, email addresses, and phone numbers.{% endblock %}
+
+{% block nav_suppliers %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h2>Suppliers Directory</h2>
+        <p>Manage vendors, distributor contact points, and procurement sources.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'add_supplier' %}" class="btn btn-primary btn-sm">
+            <i class="bx bx-plus"></i> Add New Supplier
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- TOOLBAR -->
+<div class="toolbar">
+    <div class="toolbar-search">
+        <i class="bx bx-search"></i>
+        <input type="text" id="supplierSearchInput" placeholder="Filter suppliers by name, email, or phone...">
+    </div>
+</div>
+
+<!-- SUPPLIERS TABLE -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="suppliersTable">
+            <thead>
+                <tr>
+                    <th>Vendor / Supplier</th>
+                    <th>Email Address</th>
+                    <th>Phone Contact</th>
+                    <th>Catalog Items</th>
+                    <th>Joined</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in supplier %}
+                <tr class="supplier-row">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.12); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                <i class="bx bx-store"></i>
+                            </div>
+                            <strong style="color: var(--color-text-main); font-size: 0.95rem;">
+                                {{ s.name }}
+                            </strong>
+                        </div>
+                    </td>
+                    <td>
+                        {% if s.email %}
+                            <a href="mailto:{{ s.email }}" style="color: var(--color-primary); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <i class="bx bx-envelope"></i> {{ s.email }}
+                            </a>
+                        {% else %}
+                            <span style="color: var(--color-text-muted);">&mdash;</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if s.phone %}
+                            <a href="tel:{{ s.phone }}" style="color: var(--color-text-secondary); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <i class="bx bx-phone"></i> {{ s.phone }}
+                            </a>
+                        {% else %}
+                            <span style="color: var(--color-text-muted);">&mdash;</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-info">
+                            <i class="bx bx-package"></i> {{ s.products.count }} Products
+                        </span>
+                    </td>
+                    <td style="color: var(--color-text-muted); font-size: 0.82rem;">
+                        {{ s.created_at|date:"M d, Y" }}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <a href="{% url 'update_supplier' s.id %}" class="btn btn-secondary btn-sm" title="Edit supplier" style="padding: 0.35rem 0.6rem;">
+                                <i class="bx bx-edit-alt"></i>
+                            </a>
+                            {% if user.role == 'admin' or user.is_superuser %}
+                            <a href="{% url 'delete_supplier' s.id %}" class="btn btn-danger btn-sm" title="Delete supplier" style="padding: 0.35rem 0.6rem;" onclick="return confirm('Delete supplier {{ s.name|escapejs }}?');">
+                                <i class="bx bx-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bx bx-store-alt"></i>
+                            </div>
+                            <h3 class="empty-state-title">No suppliers added yet</h3>
+                            <p class="empty-state-desc">Maintain records of your vendors, distributors, and suppliers to easily trace product sources.</p>
+                            <a href="{% url 'add_supplier' %}" class="btn btn-primary">
+                                <i class="bx bx-plus"></i> Add First Supplier
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('supplierSearchInput');
+        const rows = document.querySelectorAll('.supplier-row');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.toLowerCase().trim();
+                rows.forEach(function(row) {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = (query === '' || text.includes(query)) ? '' : 'none';
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Categories &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Manage inventory categories, departments, and product classifications.{% endblock %}
+
+{% block nav_categories %}active{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h2>Product Categories</h2>
+        <p>Organize products into structured groupings, families, and departments.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'add_category' %}" class="btn btn-primary btn-sm">
+            <i class="bx bx-plus"></i> Add New Category
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- TOOLBAR -->
+<div class="toolbar">
+    <div class="toolbar-search">
+        <i class="bx bx-search"></i>
+        <input type="text" id="categorySearchInput" placeholder="Filter categories by name...">
+    </div>
+</div>
+
+<!-- CATEGORIES TABLE -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="categoriesTable">
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Description</th>
+                    <th>Linked Products</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr class="category-row">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: rgba(6, 182, 212, 0.12); color: var(--color-secondary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                <i class="bx bx-folder"></i>
+                            </div>
+                            <strong style="color: var(--color-text-main); font-size: 0.95rem;">
+                                {{ cat.name }}
+                            </strong>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="color: var(--color-text-secondary); font-size: 0.88rem;">
+                            {{ cat.description|default:"No description provided" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-info">
+                            <i class="bx bx-package"></i> {{ cat.Products.count }} Products
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <a href="{% url 'update_category' cat.id %}" class="btn btn-secondary btn-sm" title="Edit category" style="padding: 0.35rem 0.6rem;">
+                                <i class="bx bx-edit-alt"></i>
+                            </a>
+                            {% if user.role == 'admin' or user.is_superuser %}
+                            <a href="{% url 'delete_category' cat.id %}" class="btn btn-danger btn-sm" title="Delete category" style="padding: 0.35rem 0.6rem;" onclick="return confirm('Are you sure you want to delete category {{ cat.name|escapejs }}? All associated products may be affected.');">
+                                <i class="bx bx-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bx bx-category-alt"></i>
+                            </div>
+                            <h3 class="empty-state-title">No categories yet</h3>
+                            <p class="empty-state-desc">Categories allow you to group your inventory items for easier browsing, filtering, and reporting.</p>
+                            <a href="{% url 'add_category' %}" class="btn btn-primary">
+                                <i class="bx bx-plus"></i> Create First Category
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('categorySearchInput');
+        const rows = document.querySelectorAll('.category-row');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.toLowerCase().trim();
+                rows.forEach(function(row) {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = (query === '' || text.includes(query)) ? '' : 'none';
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

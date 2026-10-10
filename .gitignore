@@ -1,3 +1,19 @@
-.env_inven
-.vscode
+# Virtual Environments
+.env_inven/
+env/
+venv/
+ENV/
+
+# Python Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+
+# Database & Local Media
 db.sqlite3
+db.sqlite3-journal
+media/

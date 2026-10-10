@@ -44,7 +44,12 @@
                     <span>Dashboard Home</span>
                 </a>
 
-                {% if user.role == 'manager' %}
+                {% if user.role == 'admin' or user.is_superuser %}
+                <a href="{% url 'admin_dashboard' %}" class="dropdown-item">
+                    <i class="bx bx-shield-quarter"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+                {% elif user.role == 'manager' %}
                 <a href="{% url 'manager_dashboard' %}" class="dropdown-item">
                     <i class="bx bx-bar-chart-square"></i>
                     <span>Manager Dashboard</span>

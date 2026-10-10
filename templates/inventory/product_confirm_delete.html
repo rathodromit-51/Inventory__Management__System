@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Delete {{ product.name }} &mdash; InvenTrack{% endblock %}
+
+{% block nav_products %}active{% endblock %}
+
+{% block content %}
+<div class="delete-confirm-box">
+    <div class="delete-confirm-icon">
+        <i class="bx bx-trash"></i>
+    </div>
+
+    <h3>Delete Product?</h3>
+    <p>
+        Are you sure you want to permanently delete <strong>{{ product.name }}</strong> (SKU: <code>{{ product.sku }}</code>)?
+        <br>
+        <span style="color: var(--color-danger); font-size: 0.82rem; display: inline-block; margin-top: 0.5rem;">
+            <i class="bx bx-error"></i> Warning: This action cannot be reversed and will remove this product from the inventory database.
+        </span>
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="delete-actions">
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">
+                <i class="bx bx-x"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-danger">
+                <i class="bx bx-trash"></i> Confirm Delete
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

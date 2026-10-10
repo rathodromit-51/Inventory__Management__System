@@ -1,0 +1,364 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}System Administration & Governance &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Administrator portal for user management, role-based security, system-wide inventory audit, and database status.{% endblock %}
+
+{% block nav_admin_dash %}active{% endblock %}
+
+{% block page_header %}
+<!-- ADMIN CONSOLE HEADER BANNER -->
+<div class="card" style="margin-bottom: 1.75rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border-color: rgba(99, 102, 241, 0.35); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);">
+    <!-- Decorative Glowing Accent -->
+    <div style="position: absolute; right: -50px; top: -50px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%); pointer-events: none;"></div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; position: relative; z-index: 2;">
+        <div style="display: flex; align-items: center; gap: 1.25rem;">
+            <!-- Avatar with Administrator Shield -->
+            <div style="position: relative;">
+                <div class="user-avatar" style="width: 58px; height: 58px; font-size: 1.4rem; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); box-shadow: 0 0 25px rgba(139, 92, 246, 0.45);">
+                    <i class="bx bxs-shield"></i>
+                </div>
+                <span style="position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; background: var(--color-success); border-radius: 50%; border: 2.5px solid var(--color-bg-card);" title="Root Admin Active"></span>
+            </div>
+
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
+                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+                        System Administration: {{ user.get_full_name|default:user.username }}
+                    </h2>
+                    <span class="badge badge-info" style="font-size: 0.72rem; letter-spacing: 0.05em; background: rgba(99, 102, 241, 0.2); color: #c7d2fe; border: 1px solid rgba(99, 102, 241, 0.4);">
+                        <i class="bx bx-shield-quarter"></i> Super Admin Console
+                    </span>
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 0.88rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                    <span><i class="bx bx-server" style="color: var(--color-primary);"></i> Enterprise Production Node</span>
+                    <span>&bull;</span>
+                    <span><i class="bx bx-lock-alt" style="color: var(--color-success);"></i> RBAC Enforcement Active</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Admin Quick Actions -->
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{% url 'admin:index' %}" class="btn btn-primary btn-sm" style="box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);">
+                <i class="bx bx-cog"></i> Django Admin Portal
+            </a>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm">
+                <i class="bx bx-package"></i> Manage Catalog
+            </a>
+            <a href="{% url 'supplier_list' %}" class="btn btn-secondary btn-sm">
+                <i class="bx bx-store-alt"></i> Manage Suppliers
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 1. SYSTEM-WIDE HIGH LEVEL GOVERNANCE METRICS -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <!-- Total Registered Accounts -->
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bx bx-user-check"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ users_count|default:"0" }}</span>
+            <span class="stat-label">Active Users</span>
+        </div>
+    </div>
+
+    <!-- Total Catalog Items -->
+    <div class="stat-card">
+        <div class="stat-icon info">
+            <i class="bx bx-package"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ products_count|default:"0" }}</span>
+            <span class="stat-label">Total Catalog SKUs</span>
+        </div>
+    </div>
+
+    <!-- Enterprise Valuation -->
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="bx bx-dollar-circle"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">₹{{ total_valuation|floatformat:2 }}</span>
+            <span class="stat-label">Enterprise Inventory Value</span>
+        </div>
+    </div>
+
+    <!-- Critical Alerts -->
+    <div class="stat-card" style="{% if low_stock_count > 0 %}border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(31, 41, 55, 0.9) 100%);{% endif %}">
+        <div class="stat-icon {% if low_stock_count > 0 %}danger{% else %}success{% endif %}">
+            <i class="bx {% if low_stock_count > 0 %}bx-error-circle{% else %}bx-check-double{% endif %}"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value" style="{% if low_stock_count > 0 %}color: var(--color-danger);{% endif %}">
+                {{ low_stock_count|default:"0" }}
+            </span>
+            <span class="stat-label">Low Stock Alarms</span>
+        </div>
+    </div>
+
+    <!-- Audited Transactions -->
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="bx bx-history"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ transactions_count|default:"0" }}</span>
+            <span class="stat-label">Audit Logs Recorded</span>
+        </div>
+    </div>
+</div>
+
+<!-- 2. TWO-COLUMN SYSTEM WORKSTATION -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    
+    <!-- LEFT COLUMN: User Governance & System Transaction Logs -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- User Accounts Governance Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-group" style="color: var(--color-primary);"></i>
+                    User Profiles & Role Governance
+                </h3>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="badge badge-info">{{ staff_count }} Staff &bull; {{ manager_count }} Manager &bull; {{ admin_count }} Admin</span>
+                    <a href="{% url 'register' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                        <i class="bx bx-user-plus"></i> New Account
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>User Profile</th>
+                            <th>Role Classification</th>
+                            <th>Contact Email</th>
+                            <th>Phone</th>
+                            <th>Date Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usr in recent_users %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                        {{ usr.username|make_list|first|upper }}
+                                    </div>
+                                    <div>
+                                        <strong style="color: #fff; font-size: 0.88rem;">{{ usr.get_full_name|default:usr.username }}</strong>
+                                        <div style="font-size: 0.72rem; color: var(--color-text-muted);">@{{ usr.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if usr.role == 'admin' or usr.is_superuser %}
+                                    <span class="badge badge-danger">ADMINISTRATOR</span>
+                                {% elif usr.role == 'manager' %}
+                                    <span class="badge badge-warning">MANAGER</span>
+                                {% else %}
+                                    <span class="badge badge-info">STAFF</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span style="font-size: 0.82rem; color: var(--color-text-secondary);">
+                                    {{ usr.email|default:"None" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-size: 0.82rem; color: var(--color-text-secondary);">
+                                    {{ usr.phone|default:"None" }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.78rem; color: var(--color-text-muted);">
+                                {{ usr.date_joined|date:"M d, Y" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+                                No users registered.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Master Transaction Ledger (With Admin Delete Actions) -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-transfer-alt" style="color: var(--color-secondary);"></i>
+                    Master Stock Movement Ledger
+                </h3>
+                <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                    View Complete Ledger ({{ transactions_count }}) <i class="bx bx-chevron-right"></i>
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Product / SKU</th>
+                            <th>Units Delta</th>
+                            <th>Operator</th>
+                            <th>Reason / Note</th>
+                            <th>Timestamp</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in recent_transactions %}
+                        <tr>
+                            <td>
+                                {% if txn.transaction_type == 'in' %}
+                                    <span class="stock-pill stock-in">
+                                        <i class="bx bx-down-arrow-alt"></i> IN
+                                    </span>
+                                {% else %}
+                                    <span class="stock-pill stock-out">
+                                        <i class="bx bx-up-arrow-alt"></i> OUT
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'product_detail' txn.product.id %}" style="font-weight: 600; color: #fff;">
+                                    {{ txn.product.name }}
+                                </a>
+                                <div style="font-size: 0.72rem; color: var(--color-text-muted); font-family: monospace;">
+                                    SKU: {{ txn.product.sku }}
+                                </div>
+                            </td>
+                            <td>
+                                <strong style="color: {% if txn.transaction_type == 'in' %}var(--color-success){% else %}var(--color-danger){% endif %};">
+                                    {% if txn.transaction_type == 'in' %}+{% else %}-{% endif %}{{ txn.quantity }}
+                                </strong>
+                            </td>
+                            <td>
+                                <span style="font-size: 0.82rem; color: var(--color-text-main);">
+                                    {{ txn.user.username|default:"System" }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+                                {{ txn.note|default:"Standard Movement" }}
+                            </td>
+                            <td style="font-size: 0.78rem; color: var(--color-text-muted);">
+                                {{ txn.created_at|date:"M d, H:i" }}
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{% url 'delete_stock' txn.id %}" class="btn btn-danger btn-sm" style="padding: 0.25rem 0.55rem; font-size: 0.72rem;" onclick="return confirm('Permanently delete this audit log entry?');" title="Delete record">
+                                    <i class="bx bx-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+                                No transaction logs recorded.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: System Health & Security Control -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- System Security & Infrastructure Status -->
+        <div class="card" style="border-color: rgba(99, 102, 241, 0.3);">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-shield-quarter" style="color: var(--color-primary);"></i>
+                    Security & Health
+                </h3>
+                <span class="badge badge-success">Operational</span>
+            </div>
+
+            <div class="spec-list">
+                <div class="spec-item">
+                    <span class="spec-label">Database Engine</span>
+                    <span class="spec-value" style="color: var(--color-success);"><i class="bx bx-check-circle"></i> SQLite3 Connected</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">RBAC Security</span>
+                    <span class="spec-value"><span class="badge badge-info">Enforced</span></span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Session Security</span>
+                    <span class="spec-value">CSRF & Session Active</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Total Categories</span>
+                    <span class="spec-value">{{ categories_count }} Groupings</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Vendor Network</span>
+                    <span class="spec-value">{{ suppliers_count }} Suppliers</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+                <a href="{% url 'admin:index' %}" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="bx bx-cog"></i> Launch Django Admin
+                </a>
+            </div>
+        </div>
+
+        <!-- Role Breakdown Distribution -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-id-card" style="color: var(--color-secondary);"></i>
+                    User Role Breakdown
+                </h3>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(99, 102, 241, 0.08); border-radius: var(--radius-sm);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bx bx-user" style="color: var(--color-primary);"></i>
+                        <span style="font-weight: 600; font-size: 0.88rem; color: #fff;">Staff Members</span>
+                    </div>
+                    <strong style="color: #fff;">{{ staff_count }}</strong>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(245, 158, 11, 0.08); border-radius: var(--radius-sm);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bx bx-briefcase" style="color: var(--color-warning);"></i>
+                        <span style="font-weight: 600; font-size: 0.88rem; color: #fff;">Operations Managers</span>
+                    </div>
+                    <strong style="color: #fff;">{{ manager_count }}</strong>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(239, 68, 68, 0.08); border-radius: var(--radius-sm);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="bx bx-shield" style="color: var(--color-danger);"></i>
+                        <span style="font-weight: 600; font-size: 0.88rem; color: #fff;">System Administrators</span>
+                    </div>
+                    <strong style="color: #fff;">{{ admin_count }}</strong>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

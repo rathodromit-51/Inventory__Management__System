@@ -1,0 +1,488 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Staff Operations Hub &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Staff warehouse operations console, live stock ledger, and critical replenishment alerts.{% endblock %}
+
+{% block nav_dashboard %}active{% endblock %}
+
+{% block page_header %}
+<!-- STAFF WELCOME BANNER -->
+<div class="card" style="margin-bottom: 1.75rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%); border-color: rgba(99, 102, 241, 0.3); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);">
+    <!-- Decorative Ambient Glow -->
+    <div style="position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%); pointer-events: none;"></div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; position: relative; z-index: 2;">
+        <div style="display: flex; align-items: center; gap: 1.25rem;">
+            <!-- Avatar with Online Status Indicator -->
+            <div style="position: relative;">
+                <div class="user-avatar" style="width: 58px; height: 58px; font-size: 1.4rem; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);">
+                    {{ user.username|default:"Staff"|make_list|first|upper }}
+                </div>
+                <span style="position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; background: var(--color-success); border-radius: 50%; border: 2.5px solid var(--color-bg-card); box-shadow: 0 0 8px var(--color-success);" title="Shift Active"></span>
+            </div>
+
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
+                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+                        Good <span id="timeGreeting">day</span>, {{ user.get_full_name|default:user.username }}!
+                    </h2>
+                    <span class="badge badge-info" style="font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                        <i class="bx bx-shield-alt"></i> {{ user.role|default:"Staff" }} Console
+                    </span>
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 0.88rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                    <span><i class="bx bx-buildings" style="color: var(--color-primary);"></i> Main Fulfillment Hub</span>
+                    <span>&bull;</span>
+                    <span><i class="bx bx-time-five" style="color: var(--color-secondary);"></i> Shift: Active &bull; <strong id="liveClock" style="color: var(--color-text-main); font-family: monospace;">--:--:--</strong></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Top Action Buttons -->
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <a href="{% url 'add_stock' %}" class="btn btn-primary btn-sm" style="box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45); padding: 0.55rem 1rem;">
+                <i class="bx bx-transfer-alt"></i> Record Stock Movement
+            </a>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm" style="padding: 0.55rem 1rem;">
+                <i class="bx bx-package"></i> Product Catalog
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 1. KEY WAREHOUSE METRICS GRID -->
+<div class="stats-grid" style="margin-bottom: 1.75rem;">
+    <!-- Active Products -->
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bx bx-package"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ products_count|default:"0" }}</span>
+            <span class="stat-label">Active SKUs on Floor</span>
+        </div>
+    </div>
+
+    <!-- Low Stock Warning Alerts -->
+    <div class="stat-card" style="{% if low_stock_count > 0 %}border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, rgba(31, 41, 55, 0.9) 100%);{% endif %}">
+        <div class="stat-icon {% if low_stock_count > 0 %}danger{% else %}success{% endif %}">
+            <i class="bx {% if low_stock_count > 0 %}bx-error-circle{% else %}bx-check-double{% endif %}"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value" style="{% if low_stock_count > 0 %}color: var(--color-danger);{% endif %}">
+                {{ low_stock_count|default:"0" }}
+            </span>
+            <span class="stat-label">Low Stock Alarms</span>
+        </div>
+    </div>
+
+    <!-- Total Movements Audited -->
+    <div class="stat-card">
+        <div class="stat-icon info">
+            <i class="bx bx-transfer-alt"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ transactions_count|default:"0" }}</span>
+            <span class="stat-label">Movements Logged</span>
+        </div>
+    </div>
+
+    <!-- Inventory Valuation -->
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="bx bx-dollar-circle"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">₹{{ total_valuation|floatformat:2 }}</span>
+            <span class="stat-label">Stock Asset Valuation</span>
+        </div>
+    </div>
+</div>
+
+<!-- 2. OPERATIONS RAPID COMMAND BAR -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <a href="{% url 'add_stock' %}" class="card" style="padding: 1.15rem 1.25rem; display: flex; align-items: center; gap: 0.85rem; border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.04); transition: transform 0.2s ease, border-color 0.2s ease;">
+        <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.15); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+            <i class="bx bx-down-arrow-circle"></i>
+        </div>
+        <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Inbound Intake</h4>
+            <span style="font-size: 0.75rem; color: var(--color-text-muted);">Receive new stock</span>
+        </div>
+    </a>
+
+    <a href="{% url 'add_stock' %}" class="card" style="padding: 1.15rem 1.25rem; display: flex; align-items: center; gap: 0.85rem; border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.04); transition: transform 0.2s ease, border-color 0.2s ease;">
+        <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: rgba(239, 68, 68, 0.15); color: var(--color-danger); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+            <i class="bx bx-up-arrow-circle"></i>
+        </div>
+        <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Outbound Dispatch</h4>
+            <span style="font-size: 0.75rem; color: var(--color-text-muted);">Issue item deliveries</span>
+        </div>
+    </a>
+
+    <a href="{% url 'product_list' %}" class="card" style="padding: 1.15rem 1.25rem; display: flex; align-items: center; gap: 0.85rem; border-color: rgba(99, 102, 241, 0.25); background: rgba(99, 102, 241, 0.04); transition: transform 0.2s ease, border-color 0.2s ease;">
+        <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: rgba(99, 102, 241, 0.15); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+            <i class="bx bx-barcode-reader"></i>
+        </div>
+        <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">SKU Catalog</h4>
+            <span style="font-size: 0.75rem; color: var(--color-text-muted);">Find items & barcodes</span>
+        </div>
+    </a>
+
+    <a href="{% url 'stock_list' %}" class="card" style="padding: 1.15rem 1.25rem; display: flex; align-items: center; gap: 0.85rem; border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.04); transition: transform 0.2s ease, border-color 0.2s ease;">
+        <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: rgba(6, 182, 212, 0.15); color: var(--color-secondary); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+            <i class="bx bx-receipt"></i>
+        </div>
+        <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Movement Logs</h4>
+            <span style="font-size: 0.75rem; color: var(--color-text-muted);">Full transaction ledger</span>
+        </div>
+    </a>
+</div>
+
+<!-- 3. TWO-COLUMN WORKSTATION LAYOUT -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    
+    <!-- LEFT: Recent Movements & High Turnover Catalog -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Live Movements Audit Feed -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-history" style="color: var(--color-primary);"></i>
+                    Recent Floor Activity & Movements
+                </h3>
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <span class="badge badge-info" style="font-size: 0.72rem;">Live Ledger</span>
+                    <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                        View All <i class="bx bx-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Movement</th>
+                            <th>Item Description</th>
+                            <th>Quantity</th>
+                            <th>Operator</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in recent_transactions %}
+                        <tr>
+                            <td>
+                                {% if txn.transaction_type == 'in' %}
+                                    <span class="stock-pill stock-in">
+                                        <i class="bx bx-down-arrow-alt"></i> IN
+                                    </span>
+                                {% else %}
+                                    <span class="stock-pill stock-out">
+                                        <i class="bx bx-up-arrow-alt"></i> OUT
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'product_detail' txn.product.id %}" style="font-weight: 600; color: var(--color-text-main);">
+                                    {{ txn.product.name }}
+                                </a>
+                                <div style="font-size: 0.72rem; color: var(--color-text-muted); font-family: monospace;">
+                                    SKU: {{ txn.product.sku }}
+                                </div>
+                            </td>
+                            <td>
+                                <strong style="color: {% if txn.transaction_type == 'in' %}var(--color-success){% else %}var(--color-danger){% endif %}; font-size: 0.95rem;">
+                                    {% if txn.transaction_type == 'in' %}+{% else %}-{% endif %}{{ txn.quantity }}
+                                </strong>
+                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">units</span>
+                            </td>
+                            <td>
+                                <span style="font-size: 0.82rem; color: var(--color-text-secondary); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                    <i class="bx bx-user" style="color: var(--color-text-muted);"></i>
+                                    {{ txn.user.username|default:"System" }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.78rem; color: var(--color-text-muted);">
+                                {{ txn.created_at|date:"M d, H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--color-text-muted);">
+                                <i class="bx bx-transfer" style="font-size: 2.2rem; display: block; margin-bottom: 0.5rem; color: var(--color-text-muted);"></i>
+                                No stock movements logged yet. Click "+ Record Stock Movement" above.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Catalog Quick Glance -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-package" style="color: var(--color-secondary);"></i>
+                    Floor Inventory Items (Latest)
+                </h3>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                    Full Catalog ({{ products_count }}) <i class="bx bx-chevron-right"></i>
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Stock Level</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Quick Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod in recent_products %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'product_detail' prod.id %}" style="font-weight: 600; color: var(--color-text-main);">
+                                    {{ prod.name }}
+                                </a>
+                                <div style="font-size: 0.75rem; color: var(--color-text-muted);">
+                                    {{ prod.category.name|default:"General Category" }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-info" style="font-family: monospace;">{{ prod.sku }}</span>
+                            </td>
+                            <td>
+                                <strong style="color: var(--color-text-main); font-size: 0.95rem;">{{ prod.quantity }}</strong>
+                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">/ min {{ prod.reorder_level }}</span>
+                            </td>
+                            <td>
+                                {% if prod.quantity == 0 %}
+                                    <span class="stock-pill stock-out">Out of Stock</span>
+                                {% elif prod.quantity <= prod.reorder_level %}
+                                    <span class="stock-pill stock-low">Low Stock</span>
+                                {% else %}
+                                    <span class="stock-pill stock-in">Healthy</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{% url 'update_stock' prod.id %}" class="btn btn-primary btn-sm" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;" title="Adjust Stock">
+                                    <i class="bx bx-transfer-alt"></i> Adjust
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+                                Catalog is empty.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT: Low Stock Queue & Shift Checklist -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Urgent Replenishment Alerts -->
+        <div class="card" style="border-color: rgba(245, 158, 11, 0.3);">
+            <div class="card-header" style="border-bottom-color: rgba(245, 158, 11, 0.2);">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-warning);">
+                    <i class="bx bx-error-alt"></i>
+                    Restock Queue
+                </h3>
+                <span class="badge badge-warning">{{ low_stock_count }} Urgent</span>
+            </div>
+
+            {% if low_stock_products %}
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                {% for item in low_stock_products %}
+                <div style="padding: 0.95rem; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+                        <div>
+                            <h4 style="font-size: 0.92rem; font-weight: 700; color: #fff;">{{ item.name }}</h4>
+                            <span style="font-size: 0.72rem; color: var(--color-text-muted); font-family: monospace;">SKU: {{ item.sku }}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 1.25rem; font-weight: 900; color: var(--color-danger);">
+                                {{ item.quantity }}
+                            </span>
+                            <span style="font-size: 0.72rem; color: var(--color-text-muted); display: block;">min {{ item.reorder_level }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar towards Minimum Level -->
+                    <div style="width: 100%; height: 5px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; margin-bottom: 0.75rem;">
+                        <div style="height: 100%; background: var(--color-danger); width: {% if item.quantity == 0 %}5%{% else %}35%{% endif %}; border-radius: 4px;"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--color-text-muted);">
+                            Supplier: {{ item.supplier.name|default:"Unassigned" }}
+                        </span>
+                        <a href="{% url 'update_stock' item.id %}" class="btn btn-primary btn-sm" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">
+                            <i class="bx bx-plus"></i> Restock
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding: 2.25rem 1rem;">
+                <div class="empty-state-icon" style="color: var(--color-success); background: var(--color-success-bg); border-color: rgba(16, 185, 129, 0.25); width: 54px; height: 54px; font-size: 1.6rem; margin-bottom: 0.85rem;">
+                    <i class="bx bx-check-shield"></i>
+                </div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Inventory Levels Safe</h4>
+                <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 0;">No items are currently below their minimum safety threshold.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Staff Shift Daily Checklist -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-task" style="color: var(--color-primary);"></i>
+                    Shift Routine Checklist
+                </h3>
+                <span class="badge badge-info" id="taskCounter" style="font-size: 0.7rem;">0/4 Done</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="shiftChecklist">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s ease;">
+                    <input type="checkbox" class="shift-task-cb" id="task1" style="width: 17px; height: 17px; accent-color: var(--color-primary); cursor: pointer;">
+                    <span style="font-size: 0.85rem; color: var(--color-text-main);">Perform morning inbound intake inspection</span>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s ease;">
+                    <input type="checkbox" class="shift-task-cb" id="task2" style="width: 17px; height: 17px; accent-color: var(--color-primary); cursor: pointer;">
+                    <span style="font-size: 0.85rem; color: var(--color-text-main);">Cycle count critical low-stock items</span>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s ease;">
+                    <input type="checkbox" class="shift-task-cb" id="task3" style="width: 17px; height: 17px; accent-color: var(--color-primary); cursor: pointer;">
+                    <span style="font-size: 0.85rem; color: var(--color-text-main);">Verify dispatch manifests & outbound orders</span>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s ease;">
+                    <input type="checkbox" class="shift-task-cb" id="task4" style="width: 17px; height: 17px; accent-color: var(--color-primary); cursor: pointer;">
+                    <span style="font-size: 0.85rem; color: var(--color-text-main);">Reconcile physical stock count vs system ledger</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Floor Operations Summary -->
+        <div class="card" style="background: rgba(255, 255, 255, 0.015);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-success-bg); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    <i class="bx bx-check-circle"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.9rem; font-weight: 700; color: #fff;">Operational Integrity</h4>
+                    <span style="font-size: 0.75rem; color: var(--color-text-muted);">Database Synchronized &bull; Real-time</span>
+                </div>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 0;">
+                All movement logs are permanently registered in the audit database. If you observe physical damage or inventory discrepancies, log a stock deduction immediately with reference notes.
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Live Real-Time Clock & Dynamic Greeting
+        const clockEl = document.getElementById('liveClock');
+        const greetingEl = document.getElementById('timeGreeting');
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            
+            // Dynamic Time Greeting
+            if (greetingEl) {
+                if (hours < 12) {
+                    greetingEl.textContent = 'morning';
+                } else if (hours < 17) {
+                    greetingEl.textContent = 'afternoon';
+                } else {
+                    greetingEl.textContent = 'evening';
+                }
+            }
+
+            // Live Digital Clock
+            if (clockEl) {
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                clockEl.textContent = timeString;
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // 2. Interactive Shift Checklist with LocalStorage Persistence
+        const checkboxes = document.querySelectorAll('.shift-task-cb');
+        const taskCounter = document.getElementById('taskCounter');
+
+        function updateCounter() {
+            let completed = 0;
+            checkboxes.forEach(cb => {
+                const label = cb.nextElementSibling;
+                if (cb.checked) {
+                    completed++;
+                    if (label) {
+                        label.style.textDecoration = 'line-through';
+                        label.style.opacity = '0.6';
+                    }
+                } else {
+                    if (label) {
+                        label.style.textDecoration = 'none';
+                        label.style.opacity = '1';
+                    }
+                }
+            });
+            if (taskCounter) {
+                taskCounter.textContent = `${completed}/${checkboxes.length} Done`;
+                if (completed === checkboxes.length) {
+                    taskCounter.className = 'badge badge-success';
+                } else {
+                    taskCounter.className = 'badge badge-info';
+                }
+            }
+        }
+
+        // Restore saved checklist state
+        checkboxes.forEach(cb => {
+            const savedState = localStorage.getItem('staff_task_' + cb.id);
+            if (savedState === 'true') {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', function() {
+                localStorage.setItem('staff_task_' + this.id, this.checked);
+                updateCounter();
+            });
+        });
+
+        updateCounter();
+    });
+</script>
+{% endblock %}

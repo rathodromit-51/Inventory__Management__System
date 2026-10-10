@@ -1,0 +1,113 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Create Account &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Register a new account on InvenTrack inventory management portal.{% endblock %}
+
+{% block sidebar %}{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card auth-card-wide">
+        <div class="auth-header">
+            <div class="auth-logo-badge">
+                <i class="bx bx-user-plus"></i>
+            </div>
+            <h2>Create Account</h2>
+            <p>Register your staff profile to access the inventory tracking tools</p>
+        </div>
+
+        <form method="post" action="{% url 'register' %}" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert danger" style="margin-bottom: 1.5rem;">
+                    <div class="alert-content">
+                        <i class="bx bx-error-circle"></i>
+                        <span>{{ form.non_field_errors.0 }}</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-grid-2">
+                <!-- Username -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.username.id_for_label }}">
+                        Username <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="form-errors">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.email.id_for_label }}">
+                        Email Address <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="form-errors">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- First Name -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.first_name.id_for_label }}">
+                        First Name
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="form-errors">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Last Name -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.last_name.id_for_label }}">
+                        Last Name
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="form-errors">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.phone.id_for_label }}">
+                        Phone Number
+                    </label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="form-errors">{{ form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.password.id_for_label }}">
+                        Password <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="form-errors">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.95rem;">
+                    <i class="bx bx-check-shield"></i> Complete Registration
+                </button>
+            </div>
+        </form>
+
+        <div class="auth-footer">
+            Already registered? <a href="{% url 'login' %}">Sign in here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

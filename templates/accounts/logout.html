@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Logged Out &mdash; InvenTrack{% endblock %}
+
+{% block sidebar %}{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card" style="text-align: center;">
+        <div class="auth-logo-badge" style="background: var(--color-info-bg); color: var(--color-info); box-shadow: none;">
+            <i class="bx bx-check"></i>
+        </div>
+        <h2>Signed Out</h2>
+        <p style="margin-bottom: 1.5rem;">You have been safely signed out of your inventory session.</p>
+
+        <a href="{% url 'login' %}" class="btn btn-primary" style="width: 100%;">
+            <i class="bx bx-log-in"></i> Sign In Again
+        </a>
+    </div>
+</div>
+{% endblock %}

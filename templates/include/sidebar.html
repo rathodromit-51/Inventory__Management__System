@@ -18,31 +18,47 @@
         <!-- Main Section -->
         <div class="nav-group-title">Main</div>
         <ul class="nav-list">
+            {% if user.role == 'staff' %}
             <li class="nav-item">
-                <a href="{% url 'home' %}" class="nav-link {% block nav_dashboard %}{% endblock %}">
+                <a href="{% url 'staff_dashboard' %}" class="nav-link ">
                     <i class="bx bxs-dashboard"></i>
                     <span class="nav-link-text">Dashboard</span>
                 </a>
             </li>
+            {% elif user.role == 'manager' %}
+            <li class="nav-item">
+                <a href="{% url 'manager_dashboard' %}" class="nav-link ">
+                    <i class="bx bxs-dashboard"></i>
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            {% elif user.role == 'admin' %}
+            <li class="nav-item">
+                <a href="{% url 'admin_dashboard' %}" class="nav-link">
+                    <i class="bx bxs-dashboard"></i>
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </li>
+            {% endif %}
         </ul>
 
         <!-- Inventory Section -->
         <div class="nav-group-title">Inventory</div>
         <ul class="nav-list">
             <li class="nav-item">
-                <a href="#" class="nav-link {% block nav_products %}{% endblock %}">
+                <a href="{% url 'product_list' %}" class="nav-link {% block nav_products %}{% endblock %}">
                     <i class="bx bx-package"></i>
                     <span class="nav-link-text">Products</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link {% block nav_categories %}{% endblock %}">
+                <a href="{% url 'category_list' %}" class="nav-link {% block nav_categories %}{% endblock %}">
                     <i class="bx bx-category-alt"></i>
                     <span class="nav-link-text">Categories</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link {% block nav_suppliers %}{% endblock %}">
+                <a href="{% url 'supplier_list' %}" class="nav-link {% block nav_suppliers %}{% endblock %}">
                     <i class="bx bx-store-alt"></i>
                     <span class="nav-link-text">Suppliers</span>
                 </a>
@@ -53,7 +69,7 @@
         <div class="nav-group-title">Stock & Logs</div>
         <ul class="nav-list">
             <li class="nav-item">
-                <a href="#" class="nav-link {% block nav_stock %}{% endblock %}">
+                <a href="{% url 'stock_list' %}" class="nav-link {% block nav_stock %}{% endblock %}">
                     <i class="bx bx-transfer-alt"></i>
                     <span class="nav-link-text">Stock Movements</span>
                 </a>
@@ -62,12 +78,28 @@
 
         <!-- Role-based Admin / Manager Section -->
         {% if user.is_authenticated and user.role == 'admin' or user.is_superuser %}
-        <div class="nav-group-title">System</div>
+        <div class="nav-group-title">Administration</div>
         <ul class="nav-list">
+            <li class="nav-item">
+                <a href="{% url 'admin_dashboard' %}" class="nav-link {% block nav_admin_dash %}{% endblock %}">
+                    <i class="bx bxs-shield"></i>
+                    <span class="nav-link-text">Admin Console</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{% url 'admin:index' %}" class="nav-link {% block nav_admin %}{% endblock %}">
                     <i class="bx bx-shield-quarter"></i>
                     <span class="nav-link-text">Django Admin</span>
+                </a>
+            </li>
+        </ul>
+        {% elif user.is_authenticated and user.role == 'manager' %}
+        <div class="nav-group-title">Management</div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="{% url 'manager_dashboard' %}" class="nav-link {% block nav_manager_dash %}{% endblock %}">
+                    <i class="bx bxs-chart"></i>
+                    <span class="nav-link-text">Manager Console</span>
                 </a>
             </li>
         </ul>

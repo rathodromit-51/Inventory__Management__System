@@ -1,0 +1,326 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Manager Operations Console &mdash; InvenTrack{% endblock %}
+{% block meta_description %}Managerial overview of catalog valuation, vendor suppliers, category distribution, and stock replenishment.{% endblock %}
+
+{% block nav_manager_dash %}active{% endblock %}
+
+{% block page_header %}
+<!-- MANAGER CONSOLE WELCOME BANNER -->
+<div class="card" style="margin-bottom: 1.75rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border-color: rgba(6, 182, 212, 0.3); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);">
+    <!-- Decorative Gradient Accent -->
+    <div style="position: absolute; right: -50px; top: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%); pointer-events: none;"></div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; position: relative; z-index: 2;">
+        <div style="display: flex; align-items: center; gap: 1.25rem;">
+            <!-- Avatar with Role Ring -->
+            <div style="position: relative;">
+                <div class="user-avatar" style="width: 58px; height: 58px; font-size: 1.4rem; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);">
+                    {{ user.username|default:"Manager"|make_list|first|upper }}
+                </div>
+                <span style="position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; background: var(--color-secondary); border-radius: 50%; border: 2.5px solid var(--color-bg-card);" title="Manager Active"></span>
+            </div>
+
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
+                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+                        Manager Console: {{ user.get_full_name|default:user.username }}
+                    </h2>
+                    <span class="badge badge-info" style="font-size: 0.72rem; letter-spacing: 0.05em; background: rgba(6, 182, 212, 0.15); color: var(--color-secondary); border: 1px solid rgba(6, 182, 212, 0.3);">
+                        <i class="bx bxs-badge-check"></i> Operations Oversight
+                    </span>
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 0.88rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                    <span><i class="bx bx-bar-chart-alt-2" style="color: var(--color-secondary);"></i> Catalog Operations & Vendor Lead Times</span>
+                    <span>&bull;</span>
+                    <span><i class="bx bx-calendar" style="color: var(--color-primary);"></i> {% now "l, F j, Y" %}</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Manager Quick Action Shortcuts -->
+        <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+            <a href="{% url 'add_product' %}" class="btn btn-primary btn-sm" style="box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
+                <i class="bx bx-plus"></i> New Product
+            </a>
+            <a href="{% url 'add_supplier' %}" class="btn btn-secondary btn-sm">
+                <i class="bx bx-store-alt"></i> New Supplier
+            </a>
+            <a href="{% url 'add_category' %}" class="btn btn-secondary btn-sm">
+                <i class="bx bx-category-alt"></i> New Category
+            </a>
+            <a href="{% url 'add_stock' %}" class="btn btn-secondary btn-sm">
+                <i class="bx bx-transfer-alt"></i> Stock Movement
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 1. EXECUTIVE KPI SUMMARY GRID -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <!-- Inventory Valuation -->
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="bx bx-dollar-circle"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">₹{{ total_valuation|floatformat:2 }}</span>
+            <span class="stat-label">Total Inventory Valuation</span>
+        </div>
+    </div>
+
+    <!-- Total Catalog Items -->
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bx bx-package"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ products_count|default:"0" }}</span>
+            <span class="stat-label">Catalog Products</span>
+        </div>
+    </div>
+
+    <!-- Low Stock Items Warning -->
+    <div class="stat-card" style="{% if low_stock_count > 0 %}border-color: rgba(245, 158, 11, 0.4); background: linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, rgba(31, 41, 55, 0.9) 100%);{% endif %}">
+        <div class="stat-icon {% if low_stock_count > 0 %}warning{% else %}success{% endif %}">
+            <i class="bx {% if low_stock_count > 0 %}bx-error-circle{% else %}bx-check-double{% endif %}"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value" style="{% if low_stock_count > 0 %}color: var(--color-warning);{% endif %}">
+                {{ low_stock_count|default:"0" }}
+            </span>
+            <span class="stat-label">Restock Warnings</span>
+        </div>
+    </div>
+
+    <!-- Active Vendors -->
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="bx bx-store-alt"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ suppliers_count|default:"0" }}</span>
+            <span class="stat-label">Active Suppliers</span>
+        </div>
+    </div>
+
+    <!-- Categories Managed -->
+    <div class="stat-card">
+        <div class="stat-icon info">
+            <i class="bx bx-category-alt"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ categories_count|default:"0" }}</span>
+            <span class="stat-label">Product Categories</span>
+        </div>
+    </div>
+</div>
+
+<!-- 2. TWO-COLUMN MANAGER WORKSTATION -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    
+    <!-- LEFT COLUMN: Movement Supervision & Category Analytics -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Live Audit & Operations Oversight Stream -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-history" style="color: var(--color-secondary);"></i>
+                    Floor Movements Oversight
+                </h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="badge badge-info">{{ transactions_count }} Total Logs</span>
+                    <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                        View Ledger <i class="bx bx-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Movement</th>
+                            <th>Product / SKU</th>
+                            <th>Units</th>
+                            <th>Authorized Operator</th>
+                            <th>Reference / Reason</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in recent_transactions %}
+                        <tr>
+                            <td>
+                                {% if txn.transaction_type == 'in' %}
+                                    <span class="stock-pill stock-in">
+                                        <i class="bx bx-down-arrow-alt"></i> IN
+                                    </span>
+                                {% else %}
+                                    <span class="stock-pill stock-out">
+                                        <i class="bx bx-up-arrow-alt"></i> OUT
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'product_detail' txn.product.id %}" style="font-weight: 600; color: #fff;">
+                                    {{ txn.product.name }}
+                                </a>
+                                <div style="font-size: 0.72rem; color: var(--color-text-muted); font-family: monospace;">
+                                    SKU: {{ txn.product.sku }}
+                                </div>
+                            </td>
+                            <td>
+                                <strong style="color: {% if txn.transaction_type == 'in' %}var(--color-success){% else %}var(--color-danger){% endif %};">
+                                    {% if txn.transaction_type == 'in' %}+{% else %}-{% endif %}{{ txn.quantity }}
+                                </strong>
+                            </td>
+                            <td>
+                                <span style="font-size: 0.82rem; color: var(--color-text-main);">
+                                    {{ txn.user.username|default:"System" }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+                                {{ txn.note|default:"Standard Adjustment" }}
+                            </td>
+                            <td style="font-size: 0.78rem; color: var(--color-text-muted);">
+                                {{ txn.created_at|date:"M d, H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--color-text-muted);">
+                                No transaction logs recorded yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Category Distribution Breakdown -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-pie-chart-alt-2" style="color: var(--color-primary);"></i>
+                    Category Distribution
+                </h3>
+                <a href="{% url 'category_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                    All Categories <i class="bx bx-chevron-right"></i>
+                </a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                {% for cat in categories_summary %}
+                <div style="padding: 1rem; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">{{ cat.name }}</h4>
+                        <span style="font-size: 0.75rem; color: var(--color-text-muted);">{{ cat.description|truncatechars:35|default:"Category grouping" }}</span>
+                    </div>
+                    <span class="badge badge-info" style="font-size: 0.75rem;">
+                        {{ cat.prod_count }} SKUs
+                    </span>
+                </div>
+                {% empty %}
+                <p style="color: var(--color-text-muted); font-size: 0.88rem; padding: 1rem;">No categories established yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Restock Queue & Supplier Directory -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Low Stock Restock Approvals Queue -->
+        <div class="card" style="border-color: rgba(245, 158, 11, 0.35);">
+            <div class="card-header" style="border-bottom-color: rgba(245, 158, 11, 0.2);">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-warning);">
+                    <i class="bx bx-error"></i>
+                    Restock Critical Items
+                </h3>
+                <span class="badge badge-warning">{{ low_stock_count }} Attention Needed</span>
+            </div>
+
+            {% if low_stock_products %}
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                {% for item in low_stock_products %}
+                <div style="padding: 0.95rem; border-radius: var(--radius-md); background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.25);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+                        <div>
+                            <h4 style="font-size: 0.92rem; font-weight: 700; color: #fff;">{{ item.name }}</h4>
+                            <span style="font-size: 0.72rem; color: var(--color-text-muted); font-family: monospace;">SKU: {{ item.sku }}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 1.25rem; font-weight: 900; color: var(--color-danger);">
+                                {{ item.quantity }}
+                            </span>
+                            <span style="font-size: 0.72rem; color: var(--color-text-muted); display: block;">threshold {{ item.reorder_level }}</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                        <span style="font-size: 0.75rem; color: var(--color-text-secondary);">
+                            {% if item.supplier %}
+                                <i class="bx bx-store"></i> {{ item.supplier.name }}
+                            {% else %}
+                                No Supplier Linked
+                            {% endif %}
+                        </span>
+                        <a href="{% url 'update_stock' item.id %}" class="btn btn-primary btn-sm" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">
+                            <i class="bx bx-plus"></i> Restock
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding: 2.25rem 1rem;">
+                <div class="empty-state-icon" style="color: var(--color-success); background: var(--color-success-bg); border-color: rgba(16, 185, 129, 0.25); width: 54px; height: 54px; font-size: 1.6rem; margin-bottom: 0.85rem;">
+                    <i class="bx bx-check-shield"></i>
+                </div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Stock Levels Compliant</h4>
+                <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 0;">All catalog products are operating above safety reorder thresholds.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Key Supplier Partners -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bx bx-store-alt" style="color: var(--color-success);"></i>
+                    Supplier Partners
+                </h3>
+                <a href="{% url 'supplier_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">
+                    Directory <i class="bx bx-chevron-right"></i>
+                </a>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for sup in suppliers_summary %}
+                <div style="padding: 0.85rem; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <strong style="font-size: 0.9rem; color: #fff; display: block;">{{ sup.name }}</strong>
+                        <span style="font-size: 0.75rem; color: var(--color-text-muted);">
+                            {% if sup.email %}{{ sup.email }}{% else %}{{ sup.phone|default:"No contact" }}{% endif %}
+                        </span>
+                    </div>
+                    <span class="badge badge-info" style="font-size: 0.72rem;">
+                        {{ sup.prod_count }} Items
+                    </span>
+                </div>
+                {% empty %}
+                <p style="color: var(--color-text-muted); font-size: 0.85rem; padding: 1rem;">No suppliers registered.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
