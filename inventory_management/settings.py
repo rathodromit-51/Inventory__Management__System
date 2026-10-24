@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 from pathlib import Path
 import os
+# pyrefly: ignore[missing-import]
 import dj_database_url
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-%gix8ub6#2ayyzx2*a9eguh_qjo#2cd61p^4g%@3s@jl+9==6d')
